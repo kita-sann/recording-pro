@@ -60,6 +60,29 @@ h1 {
   display: none;
 }
 
+.audio-meter {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0 4px;
+}
+
+.audio-level {
+  height: 100%;
+  width: 0%;
+  background: #34d399;
+  border-radius: 3px;
+  transition: width 0.15s ease-out, background-color 0.15s;
+}
+
+.audio-icon {
+  font-size: 12px;
+  min-width: 16px;
+  text-align: center;
+}
+
 .rec-dot {
   width: 8px;
   height: 8px;
@@ -115,6 +138,35 @@ h1 {
   color: #a5b4fc;
 }
 
+.staff-select-row {
+  margin-bottom: 12px;
+}
+
+.staff-select-row.hidden {
+  display: none;
+}
+
+.staff-select {
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+}
+
+.staff-select option {
+  background: #1e1e2e;
+  color: #e0e0e0;
+}
+
+.staff-select:focus {
+  border-color: #6366f1;
+}
+
 .option-row {
   margin-bottom: 16px;
 }
@@ -130,6 +182,28 @@ h1 {
 
 .option-row input[type="checkbox"] {
   accent-color: #6366f1;
+}
+
+.output-options {
+  margin-bottom: 16px;
+}
+
+.output-options .option-row {
+  margin-bottom: 4px;
+}
+
+.output-options .option-row label[data-disabled] {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.analysis-mode-options {
+  padding-left: 20px;
+  margin-top: 2px;
+}
+
+.analysis-mode-options.hidden {
+  display: none;
 }
 
 .record-btn {

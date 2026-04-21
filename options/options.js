@@ -12,6 +12,13 @@ const saveStatus = document.getElementById('save-status');
 const driveStatusEl = document.getElementById('drive-status');
 const aiStatusEl = document.getElementById('ai-status');
 
+const staffListEl = document.getElementById('staff-list');
+const staffNameInput = document.getElementById('staff-name-input');
+const staffFolderInput = document.getElementById('staff-folder-input');
+const staffAddBtn = document.getElementById('staff-add-btn');
+
+let staffList = [];
+
 function updateToggleStatus(checkbox, statusEl) {
   if (checkbox.checked) {
     statusEl.textContent = 'ON';
@@ -32,7 +39,7 @@ aiProvider.addEventListener('change', () => {
 chrome.storage.local.get([
   'driveEnabled', 'driveFolderId',
   'aiEnabled', 'aiProvider', 'aiApiKey', 'anthropicApiKey',
-  'videoQuality'
+  'videoQuality', 'staffList'
 ], (settings) => {
   driveEnabled.checked = settings.driveEnabled || false;
   driveFolderId.value = settings.driveFolderId || '';
@@ -41,6 +48,7 @@ chrome.storage.local.get([
   aiApiKey.value = settings.aiApiKey || '';
   anthropicApiKey.value = settings.anthropicApiKey || '';
   videoQuality.value = settings.videoQuality || '2500000';
+  staffList = settings.staffList || [];
 
   if (settings.aiProvider === 'anthropic') {
     anthropicKeyField.style.display = 'block';
@@ -48,6 +56,43 @@ chrome.storage.local.get([
 
   updateToggleStatus(driveEnabled, driveStatusEl);
   updateToggleStatus(aiEnabled, aiStatusEl);
+  renderStaffList();
+});
+
+function renderStaffList() {
+  staffListEl.innerHTML = '';
+  staffList.forEach((staff, index) => {
+    const item = document.createElement('div');
+    item.className = 'staff-item';
+    item.innerHTML = `
+      <span class="staff-name">${escapeHtml(staff.name)}</span>
+      <span class="staff-folder">${escapeHtml(staff.folderId)}</span>
+      <button class="btn-remove" data-index="${index}" title="削除">&times;</button>
+    `;
+    staffListEl.appendChild(item);
+  });
+  staffListEl.querySelectorAll('.btn-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      staffList.splice(Number(btn.dataset.index), 1);
+      renderStaffList();
+    });
+  });
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+staffAddBtn.addEventListener('click', () => {
+  const name = staffNameInput.value.trim();
+  const folderId = staffFolderInput.value.trim();
+  if (!name || !folderId) return;
+  staffList.push({ name, folderId });
+  staffNameInput.value = '';
+  staffFolderInput.value = '';
+  renderStaffList();
 });
 
 saveBtn.addEventListener('click', () => {
@@ -58,7 +103,8 @@ saveBtn.addEventListener('click', () => {
     aiProvider: aiProvider.value,
     aiApiKey: aiApiKey.value.trim(),
     anthropicApiKey: anthropicApiKey.value.trim(),
-    videoQuality: videoQuality.value
+    videoQuality: videoQuality.value,
+    staffList
   }, () => {
     saveStatus.textContent = '保存しました';
     setTimeout(() => {

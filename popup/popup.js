@@ -8,10 +8,76 @@ const savePrompt = document.getElementById('save-prompt');
 const saveInfo = document.getElementById('save-info');
 const saveBtn = document.getElementById('save-btn');
 const discardBtn = document.getElementById('discard-btn');
+const staffSelect = document.getElementById('staff-select');
+const staffSelectRow = document.getElementById('staff-select-row');
+const audioLevelEl = document.getElementById('audio-level');
+const audioIconEl = document.getElementById('audio-icon');
+const transcriptionToggle = document.getElementById('transcription-toggle');
+const aiAnalysisToggle = document.getElementById('ai-analysis-toggle');
+const modeMinutes = document.getElementById('mode-minutes');
+const modeFeedback = document.getElementById('mode-feedback');
+const analysisModeRow = document.getElementById('analysis-mode-row');
+
+function updateAiToggleState() {
+  if (!transcriptionToggle.checked) {
+    aiAnalysisToggle.checked = false;
+    aiAnalysisToggle.disabled = true;
+    aiAnalysisToggle.parentElement.setAttribute('data-disabled', '');
+  } else {
+    aiAnalysisToggle.disabled = false;
+    aiAnalysisToggle.parentElement.removeAttribute('data-disabled');
+  }
+  analysisModeRow.classList.toggle('hidden', !aiAnalysisToggle.checked);
+}
+
+function saveOutputOptions() {
+  chrome.storage.local.set({
+    outputOptions: {
+      transcription: transcriptionToggle.checked,
+      aiAnalysis: aiAnalysisToggle.checked,
+      modeMinutes: modeMinutes.checked,
+      modeFeedback: modeFeedback.checked
+    }
+  });
+}
+
+transcriptionToggle.addEventListener('change', () => {
+  updateAiToggleState();
+  saveOutputOptions();
+});
+
+aiAnalysisToggle.addEventListener('change', () => {
+  updateAiToggleState();
+  saveOutputOptions();
+});
+
+modeMinutes.addEventListener('change', () => { saveOutputOptions(); });
+modeFeedback.addEventListener('change', () => { saveOutputOptions(); });
 
 let selectedMode = 'screen';
 let isRecording = false;
 let timerInterval = null;
+
+chrome.storage.local.get(['staffList', 'outputOptions'], (settings) => {
+  // 出力オプションの復元
+  const opts = settings.outputOptions || {};
+  if (opts.transcription) transcriptionToggle.checked = true;
+  if (opts.aiAnalysis) aiAnalysisToggle.checked = true;
+  if (opts.modeMinutes !== undefined) modeMinutes.checked = opts.modeMinutes;
+  if (opts.modeFeedback !== undefined) modeFeedback.checked = opts.modeFeedback;
+  updateAiToggleState();
+
+  const list = settings.staffList || [];
+  if (list.length > 0) {
+    staffSelectRow.classList.remove('hidden');
+    list.forEach(staff => {
+      const opt = document.createElement('option');
+      opt.value = staff.folderId;
+      opt.textContent = staff.name;
+      staffSelect.appendChild(opt);
+    });
+  }
+});
 
 document.querySelectorAll('.mode-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -27,11 +93,15 @@ recordBtn.addEventListener('click', () => {
     chrome.runtime.sendMessage({ type: 'stop-capture' });
     stopUI();
   } else {
-    chrome.runtime.sendMessage({
+    const msg = {
       type: 'start-capture',
       mode: selectedMode,
       audio: audioToggle.checked
-    });
+    };
+    if (staffSelect.value) {
+      msg.staffFolderId = staffSelect.value;
+    }
+    chrome.runtime.sendMessage(msg);
     addLog('録画を準備中...', 'info');
   }
 });
@@ -63,6 +133,19 @@ chrome.runtime.onMessage.addListener((message) => {
       break;
     case 'analysis-complete':
       addLog('AI分析が完了しました', 'success');
+      break;
+    case 'audio-level':
+      if (audioLevelEl) {
+        audioLevelEl.style.width = message.level + '%';
+        if (message.level > 50) {
+          audioLevelEl.style.backgroundColor = '#f59e0b';
+        } else {
+          audioLevelEl.style.backgroundColor = '#34d399';
+        }
+      }
+      if (audioIconEl) {
+        audioIconEl.textContent = message.level > 3 ? '\u{1f50a}' : '\u{1f507}';
+      }
       break;
     case 'capture-cancelled':
       addLog('録画がキャンセルされました', 'info');
@@ -110,7 +193,13 @@ function stopUI() {
 }
 
 saveBtn.addEventListener('click', () => {
-  chrome.runtime.sendMessage({ type: 'confirm-save' });
+  chrome.runtime.sendMessage({
+    type: 'confirm-save',
+    transcription: transcriptionToggle.checked,
+    aiAnalysis: aiAnalysisToggle.checked,
+    modeMinutes: modeMinutes.checked,
+    modeFeedback: modeFeedback.checked
+  });
   savePrompt.classList.add('hidden');
   addLog('録画を保存しています...', 'info');
 });

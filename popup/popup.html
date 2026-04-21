@@ -20,6 +20,10 @@
     <div id="status-bar" class="status-bar hidden">
       <span class="rec-dot"></span>
       <span id="timer">00:00</span>
+      <div class="audio-meter">
+        <div id="audio-level" class="audio-level"></div>
+      </div>
+      <span id="audio-icon" class="audio-icon">&#x1f507;</span>
     </div>
 
     <div id="mode-section">
@@ -46,11 +50,48 @@
       </div>
     </div>
 
+    <div id="staff-select-row" class="staff-select-row hidden">
+      <label class="mode-label">担当者</label>
+      <select id="staff-select" class="staff-select">
+        <option value="">-- 選択なし（デフォルトフォルダ） --</option>
+      </select>
+    </div>
+
     <div class="option-row">
       <label>
         <input type="checkbox" id="audio-toggle" checked>
         音声を含める
       </label>
+    </div>
+
+    <div class="output-options">
+      <label class="mode-label">出力オプション</label>
+      <div class="option-row">
+        <label>
+          <input type="checkbox" id="transcription-toggle">
+          文字起こし
+        </label>
+      </div>
+      <div class="option-row">
+        <label>
+          <input type="checkbox" id="ai-analysis-toggle" disabled>
+          AI分析
+        </label>
+      </div>
+      <div id="analysis-mode-row" class="analysis-mode-options hidden">
+        <div class="option-row">
+          <label>
+            <input type="checkbox" id="mode-minutes" checked>
+            議事録
+          </label>
+        </div>
+        <div class="option-row">
+          <label>
+            <input type="checkbox" id="mode-feedback">
+            フィードバック
+          </label>
+        </div>
+      </div>
     </div>
 
     <button id="record-btn" class="record-btn">

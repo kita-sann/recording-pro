@@ -1,10 +1,33 @@
 import { uploadToDrive } from '../lib/drive-uploader.js';
 import { analyzeRecording } from '../lib/ai-analyzer.js';
 
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (!isRecording) return;
+  if (alarm.name === 'recording-warning') {
+    notifyPopup({ type: 'error', message: '残り10分で録画が自動停止します' });
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon128.png',
+      title: 'Recording Pro',
+      message: '残り10分で録画が自動停止します'
+    });
+  } else if (alarm.name === 'recording-auto-stop') {
+    handleStopCapture();
+    notifyPopup({ type: 'error', message: '45分経過のため録画を自動停止しました' });
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon128.png',
+      title: 'Recording Pro',
+      message: '45分経過のため録画を自動停止しました'
+    });
+  }
+});
+
 let isRecording = false;
 let recordingStartTime = null;
 let pendingRecording = null;
 let downloadResolve = null;
+let currentStaffFolderId = null;
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
@@ -13,6 +36,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       isRecording = true;
       recordingStartTime = Date.now();
       updateIcon(true);
+      chrome.alarms.create('recording-warning', { delayInMinutes: 35 });
+      chrome.alarms.create('recording-auto-stop', { delayInMinutes: 45 });
       return false;
 
     case 'recording-complete':
@@ -50,7 +75,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return false;
 
     case 'start-capture':
-      handleStartCapture(message.mode, message.audio);
+      handleStartCapture(message.mode, message.audio, message.staffFolderId);
       sendResponse({ success: true });
       return false;
 
@@ -61,7 +86,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case 'confirm-save':
       if (pendingRecording) {
-        processRecording(pendingRecording.filename, pendingRecording.size);
+        processRecording(pendingRecording.filename, pendingRecording.size, pendingRecording.staffFolderId, {
+          transcription: message.transcription || false,
+          aiAnalysis: message.aiAnalysis || false,
+          modeMinutes: message.modeMinutes !== false,
+          modeFeedback: message.modeFeedback || false
+        });
         pendingRecording = null;
       }
       sendResponse({ success: true });
@@ -99,8 +129,9 @@ async function ensureOffscreenDocument() {
   }
 }
 
-async function handleStartCapture(mode, audio) {
+async function handleStartCapture(mode, audio, staffFolderId) {
   try {
+    currentStaffFolderId = staffFolderId || null;
     await ensureOffscreenDocument();
     chrome.runtime.sendMessage({
       type: 'start-recording',
@@ -117,13 +148,16 @@ function handleStopCapture() {
   isRecording = false;
   recordingStartTime = null;
   updateIcon(false);
+  chrome.alarms.clear('recording-warning');
+  chrome.alarms.clear('recording-auto-stop');
 }
 
 async function handleRecordingComplete(size) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const filename = `recording-${timestamp}.webm`;
 
-  pendingRecording = { filename, size };
+  pendingRecording = { filename, size, staffFolderId: currentStaffFolderId };
+  currentStaffFolderId = null;
 
   notifyPopup({
     type: 'recording-pending',
@@ -132,7 +166,7 @@ async function handleRecordingComplete(size) {
   });
 }
 
-async function processRecording(filename, size) {
+async function processRecording(filename, size, staffFolderId, outputOptions = {}) {
   // ローカルダウンロード（offscreenドキュメント経由でBlob URL使用）
   try {
     await ensureOffscreenDocument();
@@ -153,10 +187,12 @@ async function processRecording(filename, size) {
 
   // Drive アップロード（設定時のみ）
   const settings = await chrome.storage.local.get([
-    'driveFolderId', 'driveEnabled', 'aiEnabled', 'aiProvider', 'aiApiKey'
+    'driveFolderId', 'driveEnabled', 'aiEnabled', 'aiProvider', 'aiApiKey', 'anthropicApiKey'
   ]);
 
-  if (settings.driveEnabled && settings.driveFolderId) {
+  const targetFolderId = staffFolderId || settings.driveFolderId;
+
+  if (settings.driveEnabled && targetFolderId) {
     try {
       const cache = await caches.open('recording-pro-temp');
       const response = await cache.match('https://recording-pro.local/latest');
@@ -167,16 +203,25 @@ async function processRecording(filename, size) {
       const blob = await response.blob();
 
       notifyPopup({ type: 'upload-start', filename });
-      const fileId = await uploadToDrive(blob, filename, settings.driveFolderId);
+      const fileId = await uploadToDrive(blob, filename, targetFolderId);
       notifyPopup({ type: 'upload-complete', filename, fileId });
 
-      if (settings.aiEnabled && settings.aiApiKey) {
+      if (settings.aiApiKey && (outputOptions.transcription || outputOptions.aiAnalysis)) {
+        const label = outputOptions.aiAnalysis ? 'AI分析' : '文字起こし';
         notifyPopup({ type: 'analysis-start', filename });
-        const analysis = await analyzeRecording(blob, settings.aiProvider, settings.aiApiKey);
-        const analysisFilename = `${filename.replace('.webm', '')}-analysis.txt`;
-        const analysisBlob = new Blob([analysis], { type: 'text/plain' });
-        await uploadToDrive(analysisBlob, analysisFilename, settings.driveFolderId);
-        notifyPopup({ type: 'analysis-complete', filename, analysis });
+        const result = await analyzeRecording(blob, settings.aiProvider, settings.aiApiKey, settings.anthropicApiKey, {
+          transcription: outputOptions.transcription || outputOptions.aiAnalysis,
+          aiAnalysis: outputOptions.aiAnalysis,
+          modeMinutes: outputOptions.modeMinutes,
+          modeFeedback: outputOptions.modeFeedback
+        });
+        if (result) {
+          const suffix = outputOptions.aiAnalysis ? '-analysis.txt' : '-transcript.txt';
+          const resultFilename = `${filename.replace('.webm', '')}${suffix}`;
+          const resultBlob = new Blob([result], { type: 'text/plain' });
+          await uploadToDrive(resultBlob, resultFilename, targetFolderId);
+          notifyPopup({ type: 'analysis-complete', filename, analysis: result });
+        }
       }
 
       await caches.delete('recording-pro-temp');
