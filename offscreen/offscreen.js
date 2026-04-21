@@ -4,16 +4,18 @@ let activeStreams = [];
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
+    case 'ping':
+      sendResponse({ ready: true });
+      return false;
     case 'start-recording':
       startRecording(message.mode, message.audio);
       sendResponse({ success: true });
-      break;
+      return false;
     case 'stop-recording':
       stopRecording();
       sendResponse({ success: true });
-      break;
+      return false;
   }
-  return true;
 });
 
 async function startRecording(mode, includeAudio) {
@@ -42,8 +44,13 @@ async function startRecording(mode, includeAudio) {
     const combinedStream = new MediaStream(tracks);
 
     recordedChunks = [];
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+      ? 'video/webm;codecs=vp9'
+      : MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+        ? 'video/webm;codecs=vp8'
+        : 'video/webm';
     mediaRecorder = new MediaRecorder(combinedStream, {
-      mimeType: 'video/webm;codecs=vp9',
+      mimeType,
       videoBitsPerSecond: 2500000
     });
 
@@ -65,7 +72,7 @@ async function startRecording(mode, includeAudio) {
       chrome.runtime.sendMessage({
         type: 'recording-complete',
         size: blob.size
-      });
+      }).catch(() => {});
 
       activeStreams.forEach(s => s.getTracks().forEach(t => t.stop()));
       activeStreams = [];
@@ -74,12 +81,12 @@ async function startRecording(mode, includeAudio) {
     };
 
     mediaRecorder.start(1000);
-    chrome.runtime.sendMessage({ type: 'recording-started' });
+    chrome.runtime.sendMessage({ type: 'recording-started' }).catch(() => {});
   } catch (error) {
     chrome.runtime.sendMessage({
       type: 'recording-error',
       error: error.message
-    });
+    }).catch(() => {});
   }
 }
 

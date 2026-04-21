@@ -22,11 +22,25 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
   });
 });
 
-recordBtn.addEventListener('click', () => {
+recordBtn.addEventListener('click', async () => {
   if (isRecording) {
     chrome.runtime.sendMessage({ type: 'stop-capture' });
     stopUI();
   } else {
+    if (selectedMode === 'camera' || selectedMode === 'both') {
+      try {
+        const result = await navigator.permissions.query({ name: 'camera' });
+        if (result.state === 'prompt' || result.state === 'denied') {
+          chrome.tabs.create({ url: chrome.runtime.getURL('permissions/camera.html') });
+          addLog('カメラ許可ページを開きました。許可後に再度お試しください。', 'info');
+          return;
+        }
+      } catch (_) {
+        chrome.tabs.create({ url: chrome.runtime.getURL('permissions/camera.html') });
+        addLog('カメラ許可ページを開きました。許可後に再度お試しください。', 'info');
+        return;
+      }
+    }
     chrome.runtime.sendMessage({
       type: 'start-capture',
       mode: selectedMode,
@@ -74,17 +88,21 @@ chrome.runtime.onMessage.addListener((message) => {
   }
 });
 
-function startUI() {
+function startUI(startTime) {
   isRecording = true;
   recordBtn.classList.add('recording');
   recordBtn.lastChild.textContent = '録画停止';
   statusBar.classList.remove('hidden');
-  let seconds = 0;
-  timerInterval = setInterval(() => {
-    seconds++;
+  let seconds = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
+  const updateTimer = () => {
     const m = String(Math.floor(seconds / 60)).padStart(2, '0');
     const s = String(seconds % 60).padStart(2, '0');
     timerEl.textContent = `${m}:${s}`;
+  };
+  updateTimer();
+  timerInterval = setInterval(() => {
+    seconds++;
+    updateTimer();
   }, 1000);
 }
 
@@ -132,6 +150,8 @@ function formatSize(bytes) {
 
 chrome.runtime.sendMessage({ type: 'get-status' }, (response) => {
   if (response?.isRecording) {
-    startUI();
+    startUI(response.startTime);
+  } else if (response?.pending) {
+    showSavePrompt(response.pending.filename, response.pending.size);
   }
 });

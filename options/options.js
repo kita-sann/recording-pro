@@ -9,6 +9,22 @@ const videoQuality = document.getElementById('video-quality');
 const saveBtn = document.getElementById('save-btn');
 const saveStatus = document.getElementById('save-status');
 
+const driveStatusEl = document.getElementById('drive-status');
+const aiStatusEl = document.getElementById('ai-status');
+
+function updateToggleStatus(checkbox, statusEl) {
+  if (checkbox.checked) {
+    statusEl.textContent = 'ON';
+    statusEl.className = 'toggle-status on';
+  } else {
+    statusEl.textContent = 'OFF';
+    statusEl.className = 'toggle-status off';
+  }
+}
+
+driveEnabled.addEventListener('change', () => updateToggleStatus(driveEnabled, driveStatusEl));
+aiEnabled.addEventListener('change', () => updateToggleStatus(aiEnabled, aiStatusEl));
+
 aiProvider.addEventListener('change', () => {
   anthropicKeyField.style.display = aiProvider.value === 'anthropic' ? 'block' : 'none';
 });
@@ -29,6 +45,9 @@ chrome.storage.local.get([
   if (settings.aiProvider === 'anthropic') {
     anthropicKeyField.style.display = 'block';
   }
+
+  updateToggleStatus(driveEnabled, driveStatusEl);
+  updateToggleStatus(aiEnabled, aiStatusEl);
 });
 
 saveBtn.addEventListener('click', () => {

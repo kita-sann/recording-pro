@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Recording Pro - カメラ許可</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      max-width: 400px;
+    }
+    h2 { color: #fff; margin-bottom: 12px; }
+    p { color: #aaa; margin-bottom: 24px; line-height: 1.6; }
+    .status { font-size: 18px; font-weight: 600; }
+    .status.success { color: #34d399; }
+    .status.error { color: #f87171; }
+    .status.waiting { color: #a5b4fc; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>カメラアクセス許可</h2>
+    <p>ブラウザのダイアログで「許可」を選択してください。<br>許可後、このタブは自動で閉じます。</p>
+    <p id="status" class="status waiting">許可を要求中...</p>
+  </div>
+  <script>
+    const statusEl = document.getElementById('status');
+    (async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        stream.getTracks().forEach(t => t.stop());
+        statusEl.textContent = '許可されました。タブを閉じます...';
+        statusEl.className = 'status success';
+        setTimeout(() => window.close(), 1000);
+      } catch (e) {
+        statusEl.textContent = 'カメラアクセスが拒否されました。ブラウザ設定から許可してください。';
+        statusEl.className = 'status error';
+      }
+    })();
+  </script>
+</body>
+</html>

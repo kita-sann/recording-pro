@@ -60,9 +60,68 @@ h2 {
 }
 
 .field input[type="checkbox"] {
-  accent-color: #6366f1;
-  width: 16px;
-  height: 16px;
+  display: none;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.toggle-switch .toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 13px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.toggle-switch .toggle-slider::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: #888;
+  border-radius: 50%;
+  transition: transform 0.3s, background 0.3s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: #6366f1;
+}
+
+.toggle-switch input:checked + .toggle-slider::after {
+  transform: translateX(22px);
+  background: #fff;
+}
+
+.toggle-label {
+  font-weight: 500;
+  color: #ccc;
+  user-select: none;
+}
+
+.toggle-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.toggle-status.on {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.12);
+}
+
+.toggle-status.off {
+  color: #888;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .field input[type="text"],

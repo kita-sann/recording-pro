@@ -7,32 +7,43 @@ let pendingRecording = null;
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
-    case 'get-status':
-      sendResponse({
-        isRecording,
-        startTime: recordingStartTime
-      });
-      break;
-
-    case 'start-capture':
-      handleStartCapture(message.mode, message.audio);
-      sendResponse({ success: true });
-      break;
-
-    case 'stop-capture':
-      handleStopCapture();
-      sendResponse({ success: true });
-      break;
-
+    case 'offscreen-ready':
     case 'recording-started':
       isRecording = true;
       recordingStartTime = Date.now();
       updateIcon(true);
-      break;
+      return false;
 
     case 'recording-complete':
       handleRecordingComplete(message.size);
-      break;
+      return false;
+
+    case 'recording-error':
+      isRecording = false;
+      recordingStartTime = null;
+      updateIcon(false);
+      notifyPopup({ type: 'error', message: message.error });
+      return false;
+
+    case 'get-status':
+      sendResponse({
+        isRecording,
+        startTime: recordingStartTime,
+        pending: pendingRecording
+          ? { filename: pendingRecording.filename, size: pendingRecording.size }
+          : null
+      });
+      return false;
+
+    case 'start-capture':
+      handleStartCapture(message.mode, message.audio);
+      sendResponse({ success: true });
+      return false;
+
+    case 'stop-capture':
+      handleStopCapture();
+      sendResponse({ success: true });
+      return false;
 
     case 'confirm-save':
       if (pendingRecording) {
@@ -40,22 +51,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         pendingRecording = null;
       }
       sendResponse({ success: true });
-      break;
+      return false;
 
     case 'discard-recording':
       pendingRecording = null;
       caches.delete('recording-pro-temp');
       sendResponse({ success: true });
-      break;
+      return false;
 
-    case 'recording-error':
-      isRecording = false;
-      recordingStartTime = null;
-      updateIcon(false);
-      notifyPopup({ type: 'error', message: message.error });
-      break;
+    default:
+      return false;
   }
-  return true;
 });
 
 async function ensureOffscreenDocument() {
@@ -69,6 +75,14 @@ async function ensureOffscreenDocument() {
     reasons: ['USER_MEDIA', 'DISPLAY_MEDIA'],
     justification: 'Recording screen and camera'
   });
+
+  for (let i = 0; i < 20; i++) {
+    try {
+      const resp = await chrome.runtime.sendMessage({ type: 'ping' });
+      if (resp?.ready) return;
+    } catch (_) { /* not ready yet */ }
+    await new Promise(r => setTimeout(r, 100));
+  }
 }
 
 async function handleStartCapture(mode, audio) {
@@ -105,8 +119,6 @@ async function handleRecordingComplete(size) {
 }
 
 async function processRecording(filename, size) {
-  notifyPopup({ type: 'recording-saved', filename, size });
-
   const cache = await caches.open('recording-pro-temp');
   const response = await cache.match('https://recording-pro.local/latest');
   if (!response) {
@@ -116,6 +128,26 @@ async function processRecording(filename, size) {
   const blob = await response.blob();
   await caches.delete('recording-pro-temp');
 
+  // ローカルダウンロード
+  try {
+    const reader = new FileReader();
+    const dataUrl = await new Promise((resolve, reject) => {
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    await chrome.downloads.download({
+      url: dataUrl,
+      filename: filename,
+      saveAs: false
+    });
+    notifyPopup({ type: 'recording-saved', filename, size });
+  } catch (error) {
+    notifyPopup({ type: 'error', message: `ダウンロードエラー: ${error.message}` });
+    return;
+  }
+
+  // Drive アップロード（設定時のみ）
   const settings = await chrome.storage.local.get([
     'driveFolderId', 'driveEnabled', 'aiEnabled', 'aiProvider', 'aiApiKey'
   ]);
@@ -146,5 +178,19 @@ function updateIcon(recording) {
 }
 
 function notifyPopup(message) {
-  chrome.runtime.sendMessage(message).catch(() => {});
+  chrome.runtime.sendMessage(message).catch(() => {
+    if (message.type === 'error' || message.type === 'upload-complete' || message.type === 'recording-saved') {
+      const text = message.type === 'error'
+        ? `エラー: ${message.message}`
+        : message.type === 'upload-complete'
+          ? `Drive アップロード完了: ${message.filename}`
+          : `保存完了: ${message.filename}`;
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/icon128.png',
+        title: 'Recording Pro',
+        message: text
+      });
+    }
+  });
 }

@@ -14,8 +14,12 @@
       <h2>Google Drive連携</h2>
       <div class="field">
         <label>
-          <input type="checkbox" id="drive-enabled">
-          録画後に自動でGoogle Driveにアップロード
+          <label class="toggle-switch">
+            <input type="checkbox" id="drive-enabled">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">録画後に自動でGoogle Driveにアップロード</span>
+          <span id="drive-status" class="toggle-status off">OFF</span>
         </label>
       </div>
       <div class="field">
@@ -29,8 +33,12 @@
       <h2>AI自動分析</h2>
       <div class="field">
         <label>
-          <input type="checkbox" id="ai-enabled">
-          録画後にAIで自動分析（文字起こし + 要約）
+          <label class="toggle-switch">
+            <input type="checkbox" id="ai-enabled">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">録画後にAIで自動分析（文字起こし + 要約）</span>
+          <span id="ai-status" class="toggle-status off">OFF</span>
         </label>
       </div>
       <div class="field">
