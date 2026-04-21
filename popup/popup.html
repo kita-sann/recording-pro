@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recording Pro</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Recording Pro</h1>
+      <button id="settings-btn" class="icon-btn" title="設定">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+      </button>
+    </header>
+
+    <div id="status-bar" class="status-bar hidden">
+      <span class="rec-dot"></span>
+      <span id="timer">00:00</span>
+    </div>
+
+    <div id="mode-section">
+      <label class="mode-label">録画モード</label>
+      <div class="mode-buttons">
+        <button class="mode-btn active" data-mode="screen">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          画面
+        </button>
+        <button class="mode-btn" data-mode="camera">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+          </svg>
+          カメラ
+        </button>
+        <button class="mode-btn" data-mode="both">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><circle cx="18" cy="18" r="3"/>
+          </svg>
+          両方
+        </button>
+      </div>
+    </div>
+
+    <div class="option-row">
+      <label>
+        <input type="checkbox" id="audio-toggle" checked>
+        音声を含める
+      </label>
+    </div>
+
+    <button id="record-btn" class="record-btn">
+      <span class="record-icon"></span>
+      録画開始
+    </button>
+
+    <div id="save-prompt" class="save-prompt hidden">
+      <p id="save-info" class="save-info"></p>
+      <div class="save-buttons">
+        <button id="save-btn" class="btn-save">保存する</button>
+        <button id="discard-btn" class="btn-discard">破棄する</button>
+      </div>
+    </div>
+
+    <div id="log" class="log"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
