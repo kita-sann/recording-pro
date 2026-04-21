@@ -15,8 +15,32 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       stopRecording();
       sendResponse({ success: true });
       return false;
+    case 'download-recording':
+      downloadFromCache(message.filename);
+      return false;
   }
 });
+
+async function downloadFromCache(filename) {
+  try {
+    const cache = await caches.open('recording-pro-temp');
+    const response = await cache.match('https://recording-pro.local/latest');
+    if (!response) {
+      chrome.runtime.sendMessage({ type: 'download-result', success: false }).catch(() => {});
+      return;
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    chrome.runtime.sendMessage({ type: 'download-result', success: true }).catch(() => {});
+  } catch (_) {
+    chrome.runtime.sendMessage({ type: 'download-result', success: false }).catch(() => {});
+  }
+}
 
 async function startRecording(mode, includeAudio) {
   try {

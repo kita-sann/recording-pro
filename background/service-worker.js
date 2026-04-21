@@ -4,6 +4,7 @@ import { analyzeRecording } from '../lib/ai-analyzer.js';
 let isRecording = false;
 let recordingStartTime = null;
 let pendingRecording = null;
+let downloadResolve = null;
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
@@ -23,6 +24,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       recordingStartTime = null;
       updateIcon(false);
       notifyPopup({ type: 'error', message: message.error });
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/icon128.png',
+        title: 'Recording Pro - 録画エラー',
+        message: message.error || '不明なエラー'
+      });
+      return false;
+
+    case 'download-result':
+      if (downloadResolve) {
+        downloadResolve(message.success);
+        downloadResolve = null;
+      }
       return false;
 
     case 'get-status':
@@ -119,28 +133,18 @@ async function handleRecordingComplete(size) {
 }
 
 async function processRecording(filename, size) {
-  const cache = await caches.open('recording-pro-temp');
-  const response = await cache.match('https://recording-pro.local/latest');
-  if (!response) {
-    notifyPopup({ type: 'error', message: '録画データの取得に失敗しました' });
-    return;
-  }
-  const blob = await response.blob();
-  await caches.delete('recording-pro-temp');
-
-  // ローカルダウンロード
+  // ローカルダウンロード（offscreenドキュメント経由でBlob URL使用）
   try {
-    const reader = new FileReader();
-    const dataUrl = await new Promise((resolve, reject) => {
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
+    await ensureOffscreenDocument();
+    const downloadOk = await new Promise((resolve) => {
+      downloadResolve = resolve;
+      chrome.runtime.sendMessage({ type: 'download-recording', filename }).catch(() => {});
+      setTimeout(() => { if (downloadResolve) { downloadResolve(false); downloadResolve = null; } }, 10000);
     });
-    await chrome.downloads.download({
-      url: dataUrl,
-      filename: filename,
-      saveAs: false
-    });
+    if (!downloadOk) {
+      notifyPopup({ type: 'error', message: '録画データの取得に失敗しました' });
+      return;
+    }
     notifyPopup({ type: 'recording-saved', filename, size });
   } catch (error) {
     notifyPopup({ type: 'error', message: `ダウンロードエラー: ${error.message}` });
@@ -154,6 +158,14 @@ async function processRecording(filename, size) {
 
   if (settings.driveEnabled && settings.driveFolderId) {
     try {
+      const cache = await caches.open('recording-pro-temp');
+      const response = await cache.match('https://recording-pro.local/latest');
+      if (!response) {
+        notifyPopup({ type: 'error', message: 'Drive: キャッシュからデータを取得できませんでした' });
+        return;
+      }
+      const blob = await response.blob();
+
       notifyPopup({ type: 'upload-start', filename });
       const fileId = await uploadToDrive(blob, filename, settings.driveFolderId);
       notifyPopup({ type: 'upload-complete', filename, fileId });
@@ -166,9 +178,13 @@ async function processRecording(filename, size) {
         await uploadToDrive(analysisBlob, analysisFilename, settings.driveFolderId);
         notifyPopup({ type: 'analysis-complete', filename, analysis });
       }
+
+      await caches.delete('recording-pro-temp');
     } catch (error) {
       notifyPopup({ type: 'error', message: `アップロードエラー: ${error.message}` });
     }
+  } else {
+    await caches.delete('recording-pro-temp');
   }
 }
 

@@ -20,36 +20,40 @@
       border-radius: 16px;
       padding: 40px;
       text-align: center;
-      max-width: 400px;
+      max-width: 440px;
     }
     h2 { color: #fff; margin-bottom: 12px; }
-    p { color: #aaa; margin-bottom: 24px; line-height: 1.6; }
-    .status { font-size: 18px; font-weight: 600; }
+    p { color: #aaa; margin-bottom: 24px; line-height: 1.6; font-size: 14px; }
+    .grant-btn {
+      padding: 14px 32px;
+      background: #6366f1;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 20px;
+    }
+    .grant-btn:hover { background: #4f46e5; }
+    .grant-btn:disabled { background: #333; cursor: not-allowed; }
+    .status { font-size: 16px; font-weight: 600; min-height: 24px; }
     .status.success { color: #34d399; }
     .status.error { color: #f87171; }
-    .status.waiting { color: #a5b4fc; }
+    .hint { color: #666; font-size: 12px; margin-top: 16px; line-height: 1.5; }
+    .arrow { font-size: 24px; margin-bottom: 8px; }
   </style>
 </head>
 <body>
   <div class="card">
     <h2>カメラアクセス許可</h2>
-    <p>ブラウザのダイアログで「許可」を選択してください。<br>許可後、このタブは自動で閉じます。</p>
-    <p id="status" class="status waiting">許可を要求中...</p>
+    <p class="arrow">&#8593;</p>
+    <p>下のボタンを押すと、アドレスバーの左側に<br>カメラ許可ダイアログが表示されます。<br>「許可」を選択してください。</p>
+    <button id="grant-btn" class="grant-btn">カメラへのアクセスを許可する</button>
+    <p id="status" class="status"></p>
+    <p class="hint">許可後、このタブを閉じて拡張機能から録画を開始できます。</p>
   </div>
-  <script>
-    const statusEl = document.getElementById('status');
-    (async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        stream.getTracks().forEach(t => t.stop());
-        statusEl.textContent = '許可されました。タブを閉じます...';
-        statusEl.className = 'status success';
-        setTimeout(() => window.close(), 1000);
-      } catch (e) {
-        statusEl.textContent = 'カメラアクセスが拒否されました。ブラウザ設定から許可してください。';
-        statusEl.className = 'status error';
-      }
-    })();
-  </script>
+  <script src="camera.js"></script>
 </body>
 </html>

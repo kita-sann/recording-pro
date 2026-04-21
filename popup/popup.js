@@ -22,25 +22,11 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
   });
 });
 
-recordBtn.addEventListener('click', async () => {
+recordBtn.addEventListener('click', () => {
   if (isRecording) {
     chrome.runtime.sendMessage({ type: 'stop-capture' });
     stopUI();
   } else {
-    if (selectedMode === 'camera' || selectedMode === 'both') {
-      try {
-        const result = await navigator.permissions.query({ name: 'camera' });
-        if (result.state === 'prompt' || result.state === 'denied') {
-          chrome.tabs.create({ url: chrome.runtime.getURL('permissions/camera.html') });
-          addLog('カメラ許可ページを開きました。許可後に再度お試しください。', 'info');
-          return;
-        }
-      } catch (_) {
-        chrome.tabs.create({ url: chrome.runtime.getURL('permissions/camera.html') });
-        addLog('カメラ許可ページを開きました。許可後に再度お試しください。', 'info');
-        return;
-      }
-    }
     chrome.runtime.sendMessage({
       type: 'start-capture',
       mode: selectedMode,
@@ -82,7 +68,12 @@ chrome.runtime.onMessage.addListener((message) => {
       addLog('録画がキャンセルされました', 'info');
       break;
     case 'error':
-      addLog(`エラー: ${message.message}`, 'error');
+      if (message.message && message.message.includes('Permission dismissed')) {
+        chrome.tabs.create({ url: chrome.runtime.getURL(`permissions/camera.html?audio=${audioToggle.checked}`) });
+        addLog('カメラ許可が必要です。許可ページを開きました。', 'info');
+      } else {
+        addLog(`エラー: ${message.message}`, 'error');
+      }
       stopUI();
       break;
   }
