@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recording Pro - Privacy Policy</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.8; color: #333; }
+    h1 { border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
+    h2 { margin-top: 2rem; color: #1a1a1a; }
+    ul { padding-left: 1.5rem; }
+    .lang-toggle { text-align: right; margin-bottom: 1rem; }
+    .lang-toggle a { cursor: pointer; color: #2563eb; text-decoration: underline; }
+    .en { display: none; }
+  </style>
+</head>
+<body>
+  <div class="lang-toggle">
+    <a onclick="document.querySelectorAll('.ja').forEach(e=>e.style.display='none');document.querySelectorAll('.en').forEach(e=>e.style.display='block');">English</a> |
+    <a onclick="document.querySelectorAll('.ja').forEach(e=>e.style.display='block');document.querySelectorAll('.en').forEach(e=>e.style.display='none');">日本語</a>
+  </div>
+
+  <!-- 日本語 -->
+  <div class="ja">
+    <h1>プライバシーポリシー - Recording Pro</h1>
+    <p>最終更新日: 2026年4月22日</p>
+
+    <h2>概要</h2>
+    <p>Recording Proは、画面録画・カメラ録画をGoogle Driveに保存し、AIで分析するChrome拡張機能です。本ポリシーでは、本拡張機能がどのようにデータを取り扱うかを説明します。</p>
+
+    <h2>収集するデータ</h2>
+    <p>本拡張機能は、ユーザーの個人情報を収集・送信しません。すべてのデータはユーザーのブラウザ内またはユーザーが明示的に設定したサービスにのみ保存されます。</p>
+
+    <h2>ローカルに保存されるデータ</h2>
+    <ul>
+      <li>設定情報（Google DriveフォルダID、AIプロバイダー設定、担当者リスト）</li>
+      <li>APIキー（OpenAI、Anthropic）- ブラウザのローカルストレージにのみ保存</li>
+      <li>録画データ - 一時的にブラウザのキャッシュに保存され、保存/破棄後に削除</li>
+    </ul>
+
+    <h2>外部サービスとの連携</h2>
+    <h3>Google Drive</h3>
+    <ul>
+      <li>ユーザーがDrive連携を有効にした場合のみ使用</li>
+      <li>OAuth 2.0認証でユーザーのGoogleアカウントに接続</li>
+      <li>スコープ: <code>drive.file</code>（本拡張機能が作成したファイルのみアクセス可能）</li>
+      <li>録画ファイルおよびAI分析結果をユーザー指定のフォルダにアップロード</li>
+    </ul>
+
+    <h3>OpenAI API</h3>
+    <ul>
+      <li>ユーザーがAI分析を有効にし、APIキーを設定した場合のみ使用</li>
+      <li>音声データをWhisper APIに送信して文字起こし</li>
+      <li>文字起こし結果をGPT-4oに送信して分析（議事録・フィードバック）</li>
+    </ul>
+
+    <h3>Anthropic API</h3>
+    <ul>
+      <li>ユーザーがAIプロバイダーとしてAnthropicを選択した場合のみ使用</li>
+      <li>文字起こし結果をClaude APIに送信して分析</li>
+    </ul>
+
+    <h2>権限の使用目的</h2>
+    <ul>
+      <li><strong>storage</strong>: 設定とAPIキーの保存</li>
+      <li><strong>identity</strong>: Google OAuth2認証</li>
+      <li><strong>offscreen</strong>: バックグラウンドでの録画処理</li>
+      <li><strong>downloads</strong>: 録画ファイルのローカルダウンロード</li>
+      <li><strong>notifications</strong>: 録画の開始・停止・エラー通知</li>
+      <li><strong>alarms</strong>: 45分録画制限のタイマー</li>
+    </ul>
+
+    <h2>データの共有</h2>
+    <p>本拡張機能は、上記の外部サービス以外にデータを送信しません。第三者へのデータ販売・共有は一切行いません。</p>
+
+    <h2>お問い合わせ</h2>
+    <p>本ポリシーに関するお問い合わせは、Chrome Web Storeのサポートページからご連絡ください。</p>
+  </div>
+
+  <!-- English -->
+  <div class="en">
+    <h1>Privacy Policy - Recording Pro</h1>
+    <p>Last updated: April 22, 2026</p>
+
+    <h2>Overview</h2>
+    <p>Recording Pro is a Chrome extension that records your screen and camera, saves recordings to Google Drive, and analyzes them with AI. This policy explains how the extension handles your data.</p>
+
+    <h2>Data Collection</h2>
+    <p>This extension does not collect or transmit any personal information. All data is stored only within your browser or in services you explicitly configure.</p>
+
+    <h2>Data Stored Locally</h2>
+    <ul>
+      <li>Settings (Google Drive folder ID, AI provider preferences, staff list)</li>
+      <li>API keys (OpenAI, Anthropic) - stored only in browser local storage</li>
+      <li>Recording data - temporarily cached in the browser and deleted after save/discard</li>
+    </ul>
+
+    <h2>External Service Integrations</h2>
+    <h3>Google Drive</h3>
+    <ul>
+      <li>Used only when the user enables Drive integration</li>
+      <li>Connects to the user's Google account via OAuth 2.0</li>
+      <li>Scope: <code>drive.file</code> (can only access files created by this extension)</li>
+      <li>Uploads recording files and AI analysis results to a user-specified folder</li>
+    </ul>
+
+    <h3>OpenAI API</h3>
+    <ul>
+      <li>Used only when the user enables AI analysis and provides an API key</li>
+      <li>Sends audio data to the Whisper API for transcription</li>
+      <li>Sends transcription results to GPT-4o for analysis (meeting minutes / feedback)</li>
+    </ul>
+
+    <h3>Anthropic API</h3>
+    <ul>
+      <li>Used only when the user selects Anthropic as their AI provider</li>
+      <li>Sends transcription results to the Claude API for analysis</li>
+    </ul>
+
+    <h2>Permission Usage</h2>
+    <ul>
+      <li><strong>storage</strong>: Save settings and API keys</li>
+      <li><strong>identity</strong>: Google OAuth2 authentication</li>
+      <li><strong>offscreen</strong>: Background recording processing</li>
+      <li><strong>downloads</strong>: Local download of recordings</li>
+      <li><strong>notifications</strong>: Recording start/stop/error alerts</li>
+      <li><strong>alarms</strong>: 45-minute recording limit timer</li>
+    </ul>
+
+    <h2>Data Sharing</h2>
+    <p>This extension does not send data to any services other than those listed above. We do not sell or share your data with third parties.</p>
+
+    <h2>Contact</h2>
+    <p>For questions about this policy, please contact us through the Chrome Web Store support page.</p>
+  </div>
+</body>
+</html>

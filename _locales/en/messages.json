@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Recording Pro",
+    "description": "Name of the extension"
+  },
+  "extDescription": {
+    "message": "Record screen & camera, auto-save to Google Drive, and analyze with AI",
+    "description": "Description of the extension"
+  }
+}

@@ -12,6 +12,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
       message: '残り10分で録画が自動停止します'
     });
   } else if (alarm.name === 'recording-auto-stop') {
+    autoStopTriggered = true;
     handleStopCapture();
     notifyPopup({ type: 'error', message: '45分経過のため録画を自動停止しました' });
     chrome.notifications.create({
@@ -28,6 +29,7 @@ let recordingStartTime = null;
 let pendingRecording = null;
 let downloadResolve = null;
 let currentStaffFolderId = null;
+let autoStopTriggered = false;
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
@@ -155,9 +157,27 @@ function handleStopCapture() {
 async function handleRecordingComplete(size) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const filename = `recording-${timestamp}.webm`;
-
-  pendingRecording = { filename, size, staffFolderId: currentStaffFolderId };
+  const staffFolderId = currentStaffFolderId;
   currentStaffFolderId = null;
+
+  if (autoStopTriggered) {
+    autoStopTriggered = false;
+    processRecording(filename, size, staffFolderId, {
+      transcription: false,
+      aiAnalysis: false,
+      modeMinutes: false,
+      modeFeedback: false
+    });
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon128.png',
+      title: 'Recording Pro',
+      message: '自動停止した録画をDriveに保存しています'
+    });
+    return;
+  }
+
+  pendingRecording = { filename, size, staffFolderId };
 
   notifyPopup({
     type: 'recording-pending',
