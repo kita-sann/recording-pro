@@ -275,7 +275,7 @@ async function startRecording(mode, includeAudio) {
       audioChunks = [];
     };
 
-    // 音声専用の録音（AI文字起こし用、64kbps — 45分でも~21MBでWhisper 25MB制限内）
+    // 音声専用の録音（AI文字起こし用、64kbps — 60分で~28MB、ai-analyzer.jsで自動分割してWhisperに送信）
     const audioTracks = combinedStream.getAudioTracks();
     if (audioTracks.length > 0) {
       // トラックをクローンしてメイン録画と干渉しないようにする

@@ -270,3 +270,116 @@ h2 {
   font-size: 13px;
   color: #34d399;
 }
+
+/* License section */
+.plan-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.plan-current-label {
+  font-size: 14px;
+  color: #ccc;
+}
+
+.plan-badge-lg {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+
+.plan-badge-lg.free {
+  background: rgba(255, 255, 255, 0.1);
+  color: #888;
+}
+
+.plan-badge-lg.pro {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+}
+
+.plan-badge-lg.team {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #fff;
+}
+
+.license-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.license-input-row input {
+  flex: 1;
+}
+
+.license-error {
+  color: #f87171;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.license-error.hidden {
+  display: none;
+}
+
+.license-active.hidden {
+  display: none;
+}
+
+.license-info {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 12px;
+  line-height: 1.8;
+}
+
+.btn-deactivate {
+  padding: 6px 16px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  color: #f87171;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn-deactivate:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+.link-gold {
+  color: #f59e0b;
+  text-decoration: none;
+}
+
+.link-gold:hover {
+  text-decoration: underline;
+}
+
+.pro-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+}
+
+.pro-tag.hidden {
+  display: none;
+}
+
+.hidden {
+  display: none;
+}
+
+.section-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}

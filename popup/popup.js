@@ -17,6 +17,17 @@ const aiAnalysisToggle = document.getElementById('ai-analysis-toggle');
 const modeMinutes = document.getElementById('mode-minutes');
 const modeFeedback = document.getElementById('mode-feedback');
 const analysisModeRow = document.getElementById('analysis-mode-row');
+const planBadge = document.getElementById('plan-badge');
+const upgradeBanner = document.getElementById('upgrade-banner');
+const upgradeLink = document.getElementById('upgrade-link');
+const limitUpgradeLink = document.getElementById('limit-upgrade-link');
+const planLimitMsg = document.getElementById('plan-limit-msg');
+const lockTranscription = document.getElementById('lock-transcription');
+const lockAi = document.getElementById('lock-ai');
+
+const CHECKOUT_URL = 'https://recording-pro.lemonsqueezy.com/checkout';
+
+let currentPlan = 'free';
 
 function updateAiToggleState() {
   if (!transcriptionToggle.checked) {
@@ -53,6 +64,51 @@ aiAnalysisToggle.addEventListener('change', () => {
 
 modeMinutes.addEventListener('change', () => { saveOutputOptions(); });
 modeFeedback.addEventListener('change', () => { saveOutputOptions(); });
+
+function updatePlanUI(plan) {
+  currentPlan = plan;
+  const isFree = plan === 'free';
+
+  // バッジ更新
+  planBadge.textContent = plan.toUpperCase();
+  planBadge.className = `plan-badge ${plan}`;
+
+  // Pro機能ロック
+  if (isFree) {
+    transcriptionToggle.checked = false;
+    transcriptionToggle.disabled = true;
+    aiAnalysisToggle.checked = false;
+    aiAnalysisToggle.disabled = true;
+    lockTranscription.classList.remove('hidden');
+    lockAi.classList.remove('hidden');
+    upgradeBanner.classList.remove('hidden');
+  } else {
+    transcriptionToggle.disabled = false;
+    aiAnalysisToggle.disabled = false;
+    lockTranscription.classList.add('hidden');
+    lockAi.classList.add('hidden');
+    upgradeBanner.classList.add('hidden');
+  }
+
+  updateAiToggleState();
+}
+
+// プラン状態を取得
+chrome.runtime.sendMessage({ type: 'get-plan-status' }, (response) => {
+  if (response?.plan) {
+    updatePlanUI(response.plan);
+  }
+});
+
+// アップグレードリンク
+upgradeLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  chrome.tabs.create({ url: CHECKOUT_URL });
+});
+limitUpgradeLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  chrome.tabs.create({ url: CHECKOUT_URL });
+});
 
 let selectedMode = 'screen';
 let isRecording = false;
@@ -146,6 +202,12 @@ chrome.runtime.onMessage.addListener((message) => {
       if (audioIconEl) {
         audioIconEl.textContent = message.level > 3 ? '\u{1f50a}' : '\u{1f507}';
       }
+      break;
+    case 'plan-info':
+      if (message.plan) updatePlanUI(message.plan);
+      break;
+    case 'plan-limit-reached':
+      planLimitMsg.classList.remove('hidden');
       break;
     case 'capture-cancelled':
       addLog('録画がキャンセルされました', 'info');

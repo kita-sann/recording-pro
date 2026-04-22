@@ -1,5 +1,6 @@
 import { uploadToDrive } from '../lib/drive-uploader.js';
 import { analyzeRecording } from '../lib/ai-analyzer.js';
+import { getLicenseStatus, activateLicense, deactivateLicense } from '../lib/license.js';
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (!isRecording) return;
@@ -13,13 +14,20 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     });
   } else if (alarm.name === 'recording-auto-stop') {
     autoStopTriggered = true;
-    handleStopCapture();
-    notifyPopup({ type: 'error', message: '45分経過のため録画を自動停止しました' });
-    chrome.notifications.create({
-      type: 'basic',
-      iconUrl: 'icons/icon128.png',
-      title: 'Recording Pro',
-      message: '45分経過のため録画を自動停止しました'
+    getLicenseStatus().then(({ plan, features }) => {
+      const maxMin = features.maxMinutes || 25;
+      const msg = `${maxMin}分経過のため録画を自動停止しました`;
+      handleStopCapture();
+      notifyPopup({ type: 'error', message: msg });
+      if (plan === 'free') {
+        notifyPopup({ type: 'plan-limit-reached', maxMinutes: maxMin });
+      }
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/icon128.png',
+        title: 'Recording Pro',
+        message: msg
+      });
     });
   }
 });
@@ -38,8 +46,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       isRecording = true;
       recordingStartTime = Date.now();
       updateIcon(true);
-      chrome.alarms.create('recording-warning', { delayInMinutes: 35 });
-      chrome.alarms.create('recording-auto-stop', { delayInMinutes: 45 });
+      // アラームは handleStartCapture でプラン別に設定済み。ここでは上書きしない。
       return false;
 
     case 'recording-complete':
@@ -105,6 +112,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ success: true });
       return false;
 
+    case 'get-plan-status':
+      getLicenseStatus().then(status => sendResponse(status));
+      return true; // async sendResponse
+
+    case 'activate-license':
+      activateLicense(message.key).then(result => sendResponse(result));
+      return true;
+
+    case 'deactivate-license':
+      deactivateLicense().then(() => sendResponse({ success: true }));
+      return true;
+
     default:
       return false;
   }
@@ -134,12 +153,26 @@ async function ensureOffscreenDocument() {
 async function handleStartCapture(mode, audio, staffFolderId) {
   try {
     currentStaffFolderId = staffFolderId || null;
+
+    // プラン別の録画時間制限
+    const { plan, features } = await getLicenseStatus();
+    const maxMin = features.maxMinutes || 25;
+    const warnMin = Math.max(maxMin - 10, 1);
+
     await ensureOffscreenDocument();
     chrome.runtime.sendMessage({
       type: 'start-recording',
       mode,
       audio
     });
+
+    // プランに応じたアラーム設定（recording-started でセットしていたものを上書き）
+    chrome.alarms.clear('recording-warning');
+    chrome.alarms.clear('recording-auto-stop');
+    chrome.alarms.create('recording-warning', { delayInMinutes: warnMin });
+    chrome.alarms.create('recording-auto-stop', { delayInMinutes: maxMin });
+
+    notifyPopup({ type: 'plan-info', plan, maxMinutes: maxMin });
   } catch (error) {
     notifyPopup({ type: 'error', message: error.message });
   }
@@ -205,6 +238,9 @@ async function processRecording(filename, size, staffFolderId, outputOptions = {
     return;
   }
 
+  // プランチェック
+  const { features } = await getLicenseStatus();
+
   // Drive アップロード（設定時のみ）
   const settings = await chrome.storage.local.get([
     'driveFolderId', 'driveEnabled', 'aiEnabled', 'aiProvider', 'aiApiKey', 'anthropicApiKey'
@@ -212,7 +248,7 @@ async function processRecording(filename, size, staffFolderId, outputOptions = {
 
   const targetFolderId = staffFolderId || settings.driveFolderId;
 
-  if (settings.driveEnabled && targetFolderId) {
+  if (settings.driveEnabled && targetFolderId && features.drive) {
     try {
       const cache = await caches.open('recording-pro-temp');
       const response = await cache.match('https://recording-pro.local/latest');
@@ -226,7 +262,7 @@ async function processRecording(filename, size, staffFolderId, outputOptions = {
       const fileId = await uploadToDrive(blob, filename, targetFolderId);
       notifyPopup({ type: 'upload-complete', filename, fileId });
 
-      if (settings.aiApiKey && (outputOptions.transcription || outputOptions.aiAnalysis)) {
+      if (features.ai && settings.aiApiKey && (outputOptions.transcription || outputOptions.aiAnalysis)) {
         const label = outputOptions.aiAnalysis ? 'AI分析' : '文字起こし';
         notifyPopup({ type: 'analysis-start', filename });
         const result = await analyzeRecording(blob, settings.aiProvider, settings.aiApiKey, settings.anthropicApiKey, {

@@ -17,7 +17,98 @@ const staffNameInput = document.getElementById('staff-name-input');
 const staffFolderInput = document.getElementById('staff-folder-input');
 const staffAddBtn = document.getElementById('staff-add-btn');
 
+// License elements
+const optionsPlanBadge = document.getElementById('options-plan-badge');
+const licenseActivateSection = document.getElementById('license-activate');
+const licenseActiveSection = document.getElementById('license-active');
+const licenseKeyInput = document.getElementById('license-key-input');
+const licenseActivateBtn = document.getElementById('license-activate-btn');
+const licenseDeactivateBtn = document.getElementById('license-deactivate-btn');
+const licenseError = document.getElementById('license-error');
+const licensePlanName = document.getElementById('license-plan-name');
+const licenseExpires = document.getElementById('license-expires');
+const licenseExpiresRow = document.getElementById('license-expires-row');
+const optionsUpgradeLink = document.getElementById('options-upgrade-link');
+const proTagDrive = document.getElementById('pro-tag-drive');
+const proTagAi = document.getElementById('pro-tag-ai');
+const sectionDrive = document.getElementById('section-drive');
+
+const CHECKOUT_URL = 'https://recording-pro.lemonsqueezy.com/checkout';
+
 let staffList = [];
+let currentPlan = 'free';
+
+function updateOptionsPlanUI(plan, expiresAt) {
+  currentPlan = plan;
+  const isFree = plan === 'free';
+
+  optionsPlanBadge.textContent = plan.toUpperCase();
+  optionsPlanBadge.className = `plan-badge-lg ${plan}`;
+
+  if (isFree) {
+    licenseActivateSection.classList.remove('hidden');
+    licenseActiveSection.classList.add('hidden');
+    proTagDrive.classList.remove('hidden');
+    proTagAi.classList.remove('hidden');
+    sectionDrive.classList.add('section-disabled');
+  } else {
+    licenseActivateSection.classList.add('hidden');
+    licenseActiveSection.classList.remove('hidden');
+    licensePlanName.textContent = plan === 'pro' ? 'Pro' : 'Team';
+    if (expiresAt) {
+      licenseExpires.textContent = new Date(expiresAt).toLocaleDateString('ja-JP');
+      licenseExpiresRow.style.display = '';
+    } else {
+      licenseExpiresRow.style.display = 'none';
+    }
+    proTagDrive.classList.add('hidden');
+    proTagAi.classList.add('hidden');
+    sectionDrive.classList.remove('section-disabled');
+  }
+}
+
+// Load plan status
+chrome.runtime.sendMessage({ type: 'get-plan-status' }, (response) => {
+  if (response?.plan) {
+    updateOptionsPlanUI(response.plan, response.expiresAt);
+  }
+});
+
+// Activate license
+licenseActivateBtn.addEventListener('click', () => {
+  const key = licenseKeyInput.value.trim();
+  if (!key) return;
+
+  licenseActivateBtn.disabled = true;
+  licenseActivateBtn.textContent = '認証中...';
+  licenseError.classList.add('hidden');
+
+  chrome.runtime.sendMessage({ type: 'activate-license', key }, (result) => {
+    licenseActivateBtn.disabled = false;
+    licenseActivateBtn.textContent = '認証';
+
+    if (result?.valid) {
+      updateOptionsPlanUI(result.plan, result.expiresAt);
+      licenseKeyInput.value = '';
+    } else {
+      licenseError.textContent = result?.error || 'ライセンスキーが無効です';
+      licenseError.classList.remove('hidden');
+    }
+  });
+});
+
+// Deactivate license
+licenseDeactivateBtn.addEventListener('click', () => {
+  chrome.runtime.sendMessage({ type: 'deactivate-license' }, () => {
+    updateOptionsPlanUI('free');
+  });
+});
+
+// Upgrade link
+optionsUpgradeLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  chrome.tabs.create({ url: CHECKOUT_URL });
+});
 
 function updateToggleStatus(checkbox, statusEl) {
   if (checkbox.checked) {

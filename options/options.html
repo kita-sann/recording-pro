@@ -10,8 +10,34 @@
   <div class="container">
     <h1>Recording Pro 設定</h1>
 
-    <section class="section">
-      <h2>Google Drive連携</h2>
+    <section class="section license-section">
+      <h2>プラン・ライセンス</h2>
+      <div class="plan-status-row">
+        <span class="plan-current-label">現在のプラン:</span>
+        <span id="options-plan-badge" class="plan-badge-lg free">FREE</span>
+      </div>
+      <div id="license-activate" class="license-form">
+        <div class="field">
+          <label for="license-key-input">ライセンスキー</label>
+          <div class="license-input-row">
+            <input type="text" id="license-key-input" placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">
+            <button id="license-activate-btn" class="btn-add" type="button">認証</button>
+          </div>
+          <p id="license-error" class="license-error hidden"></p>
+        </div>
+        <p class="hint">Proプラン購入後に届くライセンスキーを入力してください。<a id="options-upgrade-link" href="#" class="link-gold">Proプランを購入する &rarr;</a></p>
+      </div>
+      <div id="license-active" class="license-active hidden">
+        <div class="license-info">
+          <div><strong>プラン:</strong> <span id="license-plan-name"></span></div>
+          <div id="license-expires-row"><strong>有効期限:</strong> <span id="license-expires"></span></div>
+        </div>
+        <button id="license-deactivate-btn" class="btn-deactivate" type="button">ライセンスを解除</button>
+      </div>
+    </section>
+
+    <section class="section" id="section-drive">
+      <h2>Google Drive連携 <span id="pro-tag-drive" class="pro-tag hidden">PRO</span></h2>
       <div class="field">
         <label>
           <label class="toggle-switch">
@@ -30,7 +56,7 @@
     </section>
 
     <section class="section">
-      <h2>AI自動分析</h2>
+      <h2>AI自動分析 <span id="pro-tag-ai" class="pro-tag hidden">PRO</span></h2>
       <div class="field">
         <label>
           <label class="toggle-switch">

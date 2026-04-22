@@ -9,7 +9,10 @@
 <body>
   <div class="container">
     <header>
-      <h1>Recording Pro</h1>
+      <div class="header-left">
+        <h1>Recording Pro</h1>
+        <span id="plan-badge" class="plan-badge free">FREE</span>
+      </div>
       <button id="settings-btn" class="icon-btn" title="設定">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
@@ -70,12 +73,14 @@
         <label>
           <input type="checkbox" id="transcription-toggle">
           文字起こし
+          <span class="pro-lock hidden" id="lock-transcription" title="Proプランで利用可能">&#x1f512;</span>
         </label>
       </div>
       <div class="option-row">
         <label>
           <input type="checkbox" id="ai-analysis-toggle" disabled>
           AI分析
+          <span class="pro-lock hidden" id="lock-ai" title="Proプランで利用可能">&#x1f512;</span>
         </label>
       </div>
       <div id="analysis-mode-row" class="analysis-mode-options hidden">
@@ -105,6 +110,16 @@
         <button id="save-btn" class="btn-save">保存する</button>
         <button id="discard-btn" class="btn-discard">破棄する</button>
       </div>
+    </div>
+
+    <div id="upgrade-banner" class="upgrade-banner hidden">
+      <span>Proにアップグレードして全機能を解放</span>
+      <a id="upgrade-link" href="#" class="upgrade-btn">アップグレード &rarr;</a>
+    </div>
+
+    <div id="plan-limit-msg" class="plan-limit-msg hidden">
+      <p>Proプランなら60分まで録画可能です</p>
+      <a id="limit-upgrade-link" href="#" class="upgrade-btn-small">Proを見る &rarr;</a>
     </div>
 
     <div id="log" class="log"></div>
