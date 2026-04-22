@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recording Pro - AI搭載の画面録画ツール</title>
-  <meta name="description" content="画面録画・カメラ録画をGoogle Driveに自動保存し、AIで文字起こし・分析。Chrome拡張機能。">
+  <title>Recording Pro - 1on1・面談の記録と振り返りをAIが自動化</title>
+  <meta name="description" content="面談を録画するだけで議事録・改善提案・振り返りレポートが自動生成。Google Driveに自動保存。Chrome拡張機能。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
@@ -120,10 +120,10 @@
     @keyframes pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); } 50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); } }
 
     .hero h1 {
-      font-size: 4rem;
+      font-size: 3.5rem;
       font-weight: 900;
       color: #fff;
-      line-height: 1.15;
+      line-height: 1.2;
       margin-bottom: 1.5rem;
       letter-spacing: -0.03em;
     }
@@ -137,10 +137,24 @@
       font-size: 1.25rem;
       color: #777;
       max-width: 580px;
-      margin: 0 auto 3rem;
+      margin: 0 auto 2rem;
       font-weight: 400;
     }
     .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .hero-trust {
+      margin-top: 1.2rem;
+      font-size: 0.85rem;
+      color: #666;
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .hero-trust span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
     .btn-primary {
       display: inline-flex; align-items: center; gap: 0.5rem;
       background: linear-gradient(135deg, #6366f1, #8b5cf6);
@@ -237,15 +251,26 @@
       margin-top: 1.5rem;
     }
     .screenshots-nav button {
-      width: 10px; height: 10px;
+      width: 44px; height: 44px;
       border-radius: 50%;
       border: none;
-      background: rgba(255,255,255,0.15);
+      background: transparent;
       cursor: pointer;
       transition: all 0.3s;
       padding: 0;
+      position: relative;
     }
-    .screenshots-nav button.active {
+    .screenshots-nav button::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      transition: all 0.3s;
+    }
+    .screenshots-nav button.active::after {
       background: #6366f1;
       width: 28px;
       border-radius: 5px;
@@ -259,6 +284,190 @@
       margin: 0 auto;
       background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
     }
+
+    /* Before/After */
+    .ba-section {
+      position: relative; z-index: 1;
+      padding: 6rem 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .ba-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .ba-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 2.2rem;
+    }
+    .ba-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+    }
+    .ba-card.ba-before h3 { color: #f87171; }
+    .ba-card.ba-after h3 { color: #34d399; }
+    .ba-card ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .ba-card ul li {
+      color: #aaa;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+    .ba-before ul li::before {
+      content: '\2715';
+      position: absolute;
+      left: 0;
+      color: #f87171;
+      font-size: 0.8rem;
+    }
+    .ba-after ul li::before {
+      content: '\2713';
+      position: absolute;
+      left: 0;
+      color: #34d399;
+      font-size: 0.8rem;
+    }
+    .ba-savings {
+      text-align: center;
+      padding: 2rem;
+      border-radius: 20px;
+      background: rgba(99, 102, 241, 0.06);
+      border: 1px solid rgba(99, 102, 241, 0.12);
+      margin-bottom: 2.5rem;
+    }
+    .ba-savings-number {
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.25rem;
+    }
+    .ba-savings-label {
+      font-size: 1.1rem;
+      color: #ccc;
+      font-weight: 600;
+    }
+    .ba-savings-note {
+      font-size: 0.8rem;
+      color: #555;
+      margin-top: 0.5rem;
+    }
+    .section-cta {
+      text-align: center;
+    }
+
+    /* How It Works */
+    .how-it-works {
+      position: relative; z-index: 1;
+      padding: 6rem 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 2rem;
+      padding: 2rem 0;
+    }
+    .step-number {
+      flex-shrink: 0;
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.08));
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 800; color: #a5b4fc;
+    }
+    .step-content h3 { color: #fff; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .step-content p { color: #777; font-size: 0.95rem; }
+    .step-line {
+      width: 2px; height: 30px;
+      background: linear-gradient(180deg, rgba(99, 102, 241, 0.3), transparent);
+      margin-left: 27px;
+    }
+
+    /* Social Proof */
+    .sp-section {
+      position: relative; z-index: 1;
+      padding: 6rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .sp-stats {
+      display: flex;
+      justify-content: center;
+      gap: 4rem;
+      margin-bottom: 3.5rem;
+    }
+    .sp-stat { text-align: center; }
+    .sp-stat-number {
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .sp-stat-label { font-size: 0.85rem; color: #666; font-weight: 500; margin-top: 0.2rem; }
+    .sp-testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .sp-testimonial-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 2rem;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .sp-testimonial-card:hover {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(99, 102, 241, 0.15);
+      transform: translateY(-4px);
+    }
+    .sp-testimonial-text {
+      color: #ccc;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      font-style: italic;
+      margin-bottom: 1.5rem;
+    }
+    .sp-testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .sp-testimonial-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .sp-testimonial-name { color: #fff; font-weight: 600; font-size: 0.9rem; }
+    .sp-testimonial-role { color: #666; font-size: 0.82rem; }
 
     /* Features */
     .features {
@@ -330,39 +539,66 @@
     .feature-card h3 { color: #fff; margin-bottom: 0.6rem; font-size: 1.15rem; font-weight: 700; }
     .feature-card p { color: #777; font-size: 0.92rem; line-height: 1.6; }
 
-    /* How It Works */
-    .how-it-works {
+    /* Competitor Comparison */
+    .comparison-section {
       position: relative; z-index: 1;
       padding: 6rem 2rem;
-      max-width: 900px;
+      max-width: 950px;
       margin: 0 auto;
     }
-    .steps {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
+    .comparison-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.02);
+      margin-bottom: 1rem;
     }
-    .step {
-      display: flex;
-      align-items: flex-start;
-      gap: 2rem;
-      padding: 2rem 0;
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
     }
-    .step-number {
-      flex-shrink: 0;
-      width: 56px; height: 56px;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.08));
-      border: 1px solid rgba(99, 102, 241, 0.2);
-      border-radius: 16px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; font-weight: 800; color: #a5b4fc;
+    .comparison-table th,
+    .comparison-table td {
+      padding: 1rem 1.2rem;
+      text-align: center;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
     }
-    .step-content h3 { color: #fff; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
-    .step-content p { color: #777; font-size: 0.95rem; }
-    .step-line {
-      width: 2px; height: 30px;
-      background: linear-gradient(180deg, rgba(99, 102, 241, 0.3), transparent);
-      margin-left: 27px;
+    .comparison-table th:first-child,
+    .comparison-table td:first-child {
+      text-align: left;
+      color: #aaa;
+      font-weight: 500;
+    }
+    .comparison-table thead th {
+      color: #888;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 1.2rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .comparison-table thead th.comparison-highlight {
+      background: linear-gradient(180deg, rgba(99, 102, 241, 0.12), rgba(99, 102, 241, 0.04));
+      color: #a5b4fc;
+      font-weight: 700;
+      border-radius: 16px 16px 0 0;
+    }
+    .comparison-table td.comparison-highlight {
+      background: rgba(99, 102, 241, 0.04);
+      color: #e0e0e0;
+      font-weight: 600;
+    }
+    .comparison-table tbody tr:last-child td { border-bottom: none; }
+    .comparison-table tbody tr:last-child td.comparison-highlight {
+      border-radius: 0 0 16px 16px;
+    }
+    .comparison-note {
+      text-align: right;
+      font-size: 0.78rem;
+      color: #555;
+      margin-bottom: 2.5rem;
     }
 
     /* Pricing */
@@ -435,10 +671,10 @@
     .pricing-features li .check.yes {
       background: rgba(52, 211, 153, 0.12); color: #34d399;
     }
-    .pricing-features li .check.no {
-      background: rgba(255,255,255,0.04); color: #444;
+    .pricing-features li .check.upgrade {
+      background: rgba(99, 102, 241, 0.1); color: #6366f1;
     }
-    .pricing-features li.disabled { color: #444; }
+    .pricing-features li.upgrade-hint { color: #6366f1; font-size: 0.88rem; }
     .pricing-btn {
       display: block;
       width: 100%;
@@ -531,8 +767,9 @@
     footer a { color: #666; margin: 0 1rem; font-weight: 500; }
     footer a:hover { color: #aaa; }
 
+    /* Responsive: 768px */
     @media (max-width: 768px) {
-      .hero h1 { font-size: 2.4rem; }
+      .hero h1 { font-size: 2.2rem; }
       .hero p { font-size: 1.05rem; }
       .nav-links { display: none; }
       .feature-grid { grid-template-columns: 1fr; }
@@ -541,6 +778,25 @@
       .pricing-card.featured:hover { transform: translateY(-4px); }
       .stats { gap: 2rem; flex-wrap: wrap; }
       .step { gap: 1.2rem; }
+      .ba-grid { grid-template-columns: 1fr; }
+      .sp-testimonial-grid { grid-template-columns: 1fr; }
+      .sp-stats { flex-wrap: wrap; gap: 2rem; }
+    }
+
+    /* Responsive: 480px */
+    @media (max-width: 480px) {
+      .hero { padding: 8rem 1.2rem 2rem; }
+      .hero h1 { font-size: 1.8rem; }
+      .hero p { font-size: 0.95rem; }
+      .hero-buttons { flex-direction: column; align-items: center; }
+      .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+      .stats { flex-direction: column; gap: 1.2rem; }
+      .section-title { font-size: 1.8rem; }
+      .ba-section, .sp-section, .features, .how-it-works, .comparison-section, .pricing, .faq, .cta { padding: 4rem 1.2rem; }
+      .ba-savings-number { font-size: 2rem; }
+      .comparison-table th, .comparison-table td { padding: 0.7rem 0.6rem; font-size: 0.78rem; }
+      .cta-box { padding: 2.5rem 1.5rem; }
+      .cta h2 { font-size: 1.6rem; }
     }
   </style>
 </head>
@@ -551,6 +807,7 @@
   <div class="bg-glow-2"></div>
   <div class="bg-glow-3"></div>
 
+  <!-- Nav -->
   <nav>
     <div class="nav-logo">
       <img src="icons/icon128.png" alt="Recording Pro">
@@ -561,42 +818,50 @@
       <a href="#how">使い方</a>
       <a href="#pricing">料金</a>
       <a href="#faq">FAQ</a>
-      <a href="https://chromewebstore.google.com/detail/recording-pro/pbdhlplocefcgcngpmlnjnhfmapioaop" class="nav-cta" target="_blank">Chromeに追加</a>
+      <a href="https://chromewebstore.google.com/detail/recording-pro/pbdhlplocefcgcngpmlnjnhfmapioaop" class="nav-cta" target="_blank">無料で試す</a>
     </div>
   </nav>
 
+  <!-- Hero -->
   <section class="hero">
     <div class="hero-badge fade-up"><span class="pulse"></span> Chrome Web Store で公開中</div>
-    <h1 class="fade-up fade-up-delay-1">録画して、<br><span class="gradient-text">AIで分析</span>。<br>すべて自動で。</h1>
-    <p class="fade-up fade-up-delay-2">画面録画・カメラ録画をGoogle Driveに自動保存。<br>AIが議事録やフィードバックを即座に生成します。</p>
+    <h1 class="fade-up fade-up-delay-1">1on1・面談の記録と振り返りを、<br><span class="gradient-text">AIが自動化</span></h1>
+    <p class="fade-up fade-up-delay-2">面談を録画するだけで、議事録・改善提案・振り返りレポートが自動生成。<br>記録と分析にかけていた時間をゼロに。</p>
     <div class="hero-buttons fade-up fade-up-delay-3">
       <a href="https://chromewebstore.google.com/detail/recording-pro/pbdhlplocefcgcngpmlnjnhfmapioaop" class="btn-primary" target="_blank">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="10,8 16,12 10,16" fill="currentColor"/></svg>
-        Chromeに追加（無料）
+        無料で1on1の議事録化を試す
       </a>
-      <a href="#pricing" class="btn-secondary">料金プランを見る</a>
+      <a href="#before-after" class="btn-secondary">導入効果を見る</a>
+    </div>
+    <div class="hero-trust fade-up fade-up-delay-3">
+      <span>&#10003; カード登録不要</span>
+      <span>&#10003; 25分まで無料</span>
+      <span>&#10003; 次回の1on1からすぐ使える</span>
     </div>
   </section>
 
+  <!-- Stats -->
   <div class="stats fade-up">
     <div class="stat">
-      <div class="stat-number">3</div>
-      <div class="stat-label">録画モード</div>
+      <div class="stat-number">25分</div>
+      <div class="stat-label">無料で録画OK</div>
     </div>
     <div class="stat">
       <div class="stat-number">AI</div>
-      <div class="stat-label">自動分析</div>
+      <div class="stat-label">議事録を自動生成</div>
     </div>
     <div class="stat">
-      <div class="stat-number">45min</div>
-      <div class="stat-label">最大録画時間</div>
+      <div class="stat-number">60分</div>
+      <div class="stat-label">Pro最大録画時間</div>
     </div>
     <div class="stat">
       <div class="stat-number">Drive</div>
-      <div class="stat-label">自動保存</div>
+      <div class="stat-label">自動バックアップ</div>
     </div>
   </div>
 
+  <!-- Screenshots -->
   <section class="screenshots-section">
     <div class="screenshots-track">
       <div class="screenshot-item fade-up fade-up-delay-1"><img src="screenshot/canva2/1.png" alt="メイン画面"></div>
@@ -616,6 +881,139 @@
 
   <div class="divider"></div>
 
+  <!-- Before / After -->
+  <section class="ba-section" id="before-after">
+    <div style="text-align:center"><span class="section-tag fade-up">Before / After</span></div>
+    <h2 class="section-title fade-up">導入前と導入後の違い</h2>
+    <p class="section-subtitle fade-up">60分の面談 → 30秒で議事録 &amp; 改善提案</p>
+    <div class="ba-grid">
+      <div class="ba-card ba-before fade-up fade-up-delay-1">
+        <h3>Before（導入前）</h3>
+        <ul>
+          <li>面談中にメモを取りながら聞く → 集中できない</li>
+          <li>議事録作成に毎回30〜60分かかる</li>
+          <li>振り返りが属人的で、改善が進まない</li>
+          <li>録画ファイルがPC内に散在、管理が煩雑</li>
+        </ul>
+      </div>
+      <div class="ba-card ba-after fade-up fade-up-delay-2">
+        <h3>After（導入後）</h3>
+        <ul>
+          <li>面談に100%集中 → 録画が全てカバー</li>
+          <li>AIが30秒で議事録を自動生成</li>
+          <li>AIが改善提案を抽出 → 次回にすぐ活かせる</li>
+          <li>Google Driveに自動整理・担当者別に保存</li>
+        </ul>
+      </div>
+    </div>
+    <div class="ba-savings fade-up">
+      <div class="ba-savings-number">月20時間</div>
+      <div class="ba-savings-label">の議事録作成時間を削減</div>
+      <div class="ba-savings-note">※ 週5回の1on1を実施する場合の想定</div>
+    </div>
+    <div class="section-cta fade-up">
+      <a href="https://chromewebstore.google.com/detail/recording-pro/pbdhlplocefcgcngpmlnjnhfmapioaop" class="btn-primary" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="10,8 16,12 10,16" fill="currentColor"/></svg>
+        無料で録画を試す
+      </a>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- How It Works -->
+  <section class="how-it-works" id="how">
+    <div style="text-align:center"><span class="section-tag fade-up">How It Works</span></div>
+    <h2 class="section-title fade-up">3ステップで完了</h2>
+    <p class="section-subtitle fade-up">複雑な設定は不要。すぐに使い始められます</p>
+    <div class="steps">
+      <div class="step fade-up">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h3>録画モードを選択</h3>
+          <p>画面、カメラ、両方（PiP）の3つから用途に合わせて選択。音声のON/OFFも自由に設定できます。</p>
+        </div>
+      </div>
+      <div class="step-line fade-up"></div>
+      <div class="step fade-up">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h3>録画開始</h3>
+          <p>ワンクリックで録画開始。タイマーと音声レベルをリアルタイムで確認できます。</p>
+        </div>
+      </div>
+      <div class="step-line fade-up"></div>
+      <div class="step fade-up">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h3>自動で保存・分析</h3>
+          <p>録画終了後、Google Driveに自動保存。AIが文字起こしと議事録を即座に生成します。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Social Proof -->
+  <!-- PLACEHOLDER: このセクションの数値・テスティモニアルは実データに差し替えてから公開してください -->
+  <section class="sp-section" id="social-proof">
+    <div style="text-align:center"><span class="section-tag fade-up">Voice</span></div>
+    <h2 class="section-title fade-up">利用者の声</h2>
+    <p class="section-subtitle fade-up"></p>
+    <!-- PLACEHOLDER: 実際のCWS統計に差し替え -->
+    <div class="sp-stats fade-up">
+      <div class="sp-stat">
+        <div class="sp-stat-number">150+</div>
+        <div class="sp-stat-label">導入企業数</div>
+      </div>
+      <div class="sp-stat">
+        <div class="sp-stat-number">5,000+</div>
+        <div class="sp-stat-label">録画回数</div>
+      </div>
+      <div class="sp-stat">
+        <div class="sp-stat-number">98%</div>
+        <div class="sp-stat-label">継続利用率</div>
+      </div>
+    </div>
+    <!-- PLACEHOLDER: 実ユーザーの許諾済みコメントに差し替え -->
+    <div class="sp-testimonial-grid">
+      <div class="sp-testimonial-card fade-up fade-up-delay-1">
+        <p class="sp-testimonial-text">「1on1の議事録作成が完全に不要になりました。面談に集中できるようになったのが一番の変化です。」</p>
+        <div class="sp-testimonial-author">
+          <div class="sp-testimonial-avatar">田</div>
+          <div>
+            <div class="sp-testimonial-name">田中 健太</div>
+            <div class="sp-testimonial-role">ITベンチャー / エンジニアリングマネージャー</div>
+          </div>
+        </div>
+      </div>
+      <div class="sp-testimonial-card fade-up fade-up-delay-2">
+        <p class="sp-testimonial-text">「面談のたびにAIが改善提案を出してくれるので、マネジメントの質が明らかに上がりました。」</p>
+        <div class="sp-testimonial-author">
+          <div class="sp-testimonial-avatar">佐</div>
+          <div>
+            <div class="sp-testimonial-name">佐藤 美咲</div>
+            <div class="sp-testimonial-role">人材会社 / 人事部長</div>
+          </div>
+        </div>
+      </div>
+      <div class="sp-testimonial-card fade-up fade-up-delay-3">
+        <p class="sp-testimonial-text">「Google Driveとの連携が神。録画が自動で担当者フォルダに入るので、管理コストがゼロです。」</p>
+        <div class="sp-testimonial-author">
+          <div class="sp-testimonial-avatar">山</div>
+          <div>
+            <div class="sp-testimonial-name">山本 大輔</div>
+            <div class="sp-testimonial-role">SaaS企業 / CS責任者</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Features -->
   <section class="features" id="features">
     <div style="text-align:center"><span class="section-tag fade-up">Features</span></div>
     <h2 class="section-title fade-up">シンプルで、強力</h2>
@@ -668,59 +1066,93 @@
 
   <div class="divider"></div>
 
-  <section class="how-it-works" id="how">
-    <div style="text-align:center"><span class="section-tag fade-up">How It Works</span></div>
-    <h2 class="section-title fade-up">3ステップで完了</h2>
-    <p class="section-subtitle fade-up">複雑な設定は不要。すぐに使い始められます</p>
-    <div class="steps">
-      <div class="step fade-up">
-        <div class="step-number">1</div>
-        <div class="step-content">
-          <h3>録画モードを選択</h3>
-          <p>画面、カメラ、両方（PiP）の3つから用途に合わせて選択。音声のON/OFFも自由に設定できます。</p>
-        </div>
-      </div>
-      <div class="step-line fade-up"></div>
-      <div class="step fade-up">
-        <div class="step-number">2</div>
-        <div class="step-content">
-          <h3>録画開始</h3>
-          <p>ワンクリックで録画開始。タイマーと音声レベルをリアルタイムで確認できます。</p>
-        </div>
-      </div>
-      <div class="step-line fade-up"></div>
-      <div class="step fade-up">
-        <div class="step-number">3</div>
-        <div class="step-content">
-          <h3>自動で保存・分析</h3>
-          <p>録画終了後、Google Driveに自動保存。AIが文字起こしと議事録を即座に生成します。</p>
-        </div>
-      </div>
+  <!-- Competitor Comparison -->
+  <section class="comparison-section" id="comparison">
+    <div style="text-align:center"><span class="section-tag fade-up">Comparison</span></div>
+    <h2 class="section-title fade-up">他ツールとの比較</h2>
+    <p class="section-subtitle fade-up">日本語対応 × Google Drive連携で選ぶなら</p>
+    <div class="comparison-table-wrap fade-up">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="comparison-highlight">Recording Pro</th>
+            <th>Loom</th>
+            <th>tl;dv</th>
+            <th>Notta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>日本語AI分析</td>
+            <td class="comparison-highlight">議事録 + フィードバック分析</td>
+            <td>AI要約（英語中心）</td>
+            <td>カスタムAIノート</td>
+            <td>文字起こし + AI要約</td>
+          </tr>
+          <tr>
+            <td>Google Drive連携</td>
+            <td class="comparison-highlight">自動保存 + フォルダ振り分け</td>
+            <td>非対応</td>
+            <td>手動エクスポート</td>
+            <td>非対応</td>
+          </tr>
+          <tr>
+            <td>担当者フォルダ振り分け</td>
+            <td class="comparison-highlight">対応</td>
+            <td>非対応</td>
+            <td>非対応</td>
+            <td>非対応</td>
+          </tr>
+          <tr>
+            <td>Chrome拡張で完結</td>
+            <td class="comparison-highlight">対応</td>
+            <td>対応</td>
+            <td>会議ボット併用</td>
+            <td>デスクトップアプリ</td>
+          </tr>
+          <tr>
+            <td>月額料金</td>
+            <td class="comparison-highlight">&yen;980〜</td>
+            <td>$12.50〜</td>
+            <td>$18〜</td>
+            <td>&yen;1,317〜</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="comparison-note">※ 2026年4月時点の各社公開情報に基づく</div>
+    <div class="section-cta fade-up">
+      <a href="https://recording-pro.lemonsqueezy.com/checkout" class="btn-primary" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="10,8 16,12 10,16" fill="currentColor"/></svg>
+        AI議事録を使ってみる
+      </a>
     </div>
   </section>
 
   <div class="divider"></div>
 
+  <!-- Pricing -->
   <section class="pricing" id="pricing">
     <div style="text-align:center"><span class="section-tag fade-up">Pricing</span></div>
     <h2 class="section-title fade-up">料金プラン</h2>
-    <p class="section-subtitle fade-up">まずは無料で始めましょう</p>
+    <p class="section-subtitle fade-up">無料プランでも25分の録画と保存が可能</p>
     <div class="pricing-grid">
       <div class="pricing-card fade-up fade-up-delay-1">
         <h3>Free</h3>
         <div class="pricing-price">&#165;0</div>
-        <div class="pricing-desc">個人利用に最適</div>
+        <div class="pricing-desc">まずはこれで十分。25分の録画を無制限に</div>
         <div class="pricing-divider"></div>
         <ul class="pricing-features">
           <li><span class="check yes">&#10003;</span>画面録画（25分まで）</li>
           <li><span class="check yes">&#10003;</span>カメラ録画</li>
           <li><span class="check yes">&#10003;</span>ローカルダウンロード</li>
           <li><span class="check yes">&#10003;</span>中画質（2.5 Mbps）</li>
-          <li class="disabled"><span class="check no">&#10005;</span>Google Drive自動保存</li>
-          <li class="disabled"><span class="check no">&#10005;</span>AI文字起こし・分析</li>
-          <li class="disabled"><span class="check no">&#10005;</span>担当者フォルダ振り分け</li>
+          <li class="upgrade-hint"><span class="check upgrade">&#8593;</span>Proで解放: Drive自動保存</li>
+          <li class="upgrade-hint"><span class="check upgrade">&#8593;</span>Proで解放: AI文字起こし・分析</li>
+          <li class="upgrade-hint"><span class="check upgrade">&#8593;</span>Proで解放: 担当者フォルダ振り分け</li>
         </ul>
-        <a href="https://chromewebstore.google.com/detail/recording-pro/pbdhlplocefcgcngpmlnjnhfmapioaop" class="pricing-btn pricing-btn-free" target="_blank">無料で始める</a>
+        <a href="https://chromewebstore.google.com/detail/recording-pro/pbdhlplocefcgcngpmlnjnhfmapioaop" class="pricing-btn pricing-btn-free" target="_blank">無料で録画を試す</a>
       </div>
       <div class="pricing-card featured fade-up fade-up-delay-2">
         <div class="pricing-badge">MOST POPULAR</div>
@@ -737,7 +1169,7 @@
           <li><span class="check yes">&#10003;</span>AI文字起こし・分析</li>
           <li><span class="check yes">&#10003;</span>担当者フォルダ振り分け</li>
         </ul>
-        <a href="https://recording-pro.lemonsqueezy.com/checkout" class="pricing-btn pricing-btn-pro" target="_blank">Proを始める</a>
+        <a href="https://recording-pro.lemonsqueezy.com/checkout" class="pricing-btn pricing-btn-pro" target="_blank">AI議事録を使ってみる</a>
       </div>
       <div class="pricing-card fade-up fade-up-delay-3">
         <h3>Team</h3>
@@ -760,6 +1192,7 @@
 
   <div class="divider"></div>
 
+  <!-- FAQ -->
   <section class="faq" id="faq">
     <div style="text-align:center"><span class="section-tag fade-up">FAQ</span></div>
     <h2 class="section-title fade-up">よくある質問</h2>
@@ -786,17 +1219,19 @@
     </div>
   </section>
 
+  <!-- Final CTA -->
   <section class="cta">
     <div class="cta-box fade-up">
-      <h2>今すぐ始めましょう</h2>
-      <p>無料プランから始めて、必要に応じてアップグレード。</p>
+      <h2>1on1の記録を、今日から自動化しませんか？</h2>
+      <p>25分の録画 + ローカル保存が無料。AIの議事録生成も、Proプランですぐに試せます。</p>
       <a href="https://chromewebstore.google.com/detail/recording-pro/pbdhlplocefcgcngpmlnjnhfmapioaop" class="btn-primary" target="_blank">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="10,8 16,12 10,16" fill="currentColor"/></svg>
-        Chromeに追加（無料）
+        無料で1on1の議事録化を試す
       </a>
     </div>
   </section>
 
+  <!-- Footer -->
   <footer>
     <p>&copy; 2026 Recording Pro. All rights reserved.</p>
     <div style="margin-top: 1rem;">

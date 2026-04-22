@@ -1,10 +1,23 @@
+// i18n: apply localized text
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = chrome.i18n.getMessage(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = chrome.i18n.getMessage(el.getAttribute('data-i18n-title'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = chrome.i18n.getMessage(el.getAttribute('data-i18n-placeholder'));
+  });
+}
+applyI18n();
+
+const msg = (key, ...subs) => chrome.i18n.getMessage(key, subs);
+
 const driveEnabled = document.getElementById('drive-enabled');
 const driveFolderId = document.getElementById('drive-folder-id');
 const aiEnabled = document.getElementById('ai-enabled');
 const aiProvider = document.getElementById('ai-provider');
-const aiApiKey = document.getElementById('ai-api-key');
-const anthropicApiKey = document.getElementById('anthropic-api-key');
-const anthropicKeyField = document.getElementById('anthropic-key-field');
 const videoQuality = document.getElementById('video-quality');
 const saveBtn = document.getElementById('save-btn');
 const saveStatus = document.getElementById('save-status');
@@ -56,7 +69,7 @@ function updateOptionsPlanUI(plan, expiresAt) {
     licenseActiveSection.classList.remove('hidden');
     licensePlanName.textContent = plan === 'pro' ? 'Pro' : 'Team';
     if (expiresAt) {
-      licenseExpires.textContent = new Date(expiresAt).toLocaleDateString('ja-JP');
+      licenseExpires.textContent = new Date(expiresAt).toLocaleDateString();
       licenseExpiresRow.style.display = '';
     } else {
       licenseExpiresRow.style.display = 'none';
@@ -80,18 +93,18 @@ licenseActivateBtn.addEventListener('click', () => {
   if (!key) return;
 
   licenseActivateBtn.disabled = true;
-  licenseActivateBtn.textContent = '認証中...';
+  licenseActivateBtn.textContent = msg('activating');
   licenseError.classList.add('hidden');
 
   chrome.runtime.sendMessage({ type: 'activate-license', key }, (result) => {
     licenseActivateBtn.disabled = false;
-    licenseActivateBtn.textContent = '認証';
+    licenseActivateBtn.textContent = msg('activate');
 
     if (result?.valid) {
       updateOptionsPlanUI(result.plan, result.expiresAt);
       licenseKeyInput.value = '';
     } else {
-      licenseError.textContent = result?.error || 'ライセンスキーが無効です';
+      licenseError.textContent = result?.error || msg('invalidLicense');
       licenseError.classList.remove('hidden');
     }
   });
@@ -112,10 +125,10 @@ optionsUpgradeLink.addEventListener('click', (e) => {
 
 function updateToggleStatus(checkbox, statusEl) {
   if (checkbox.checked) {
-    statusEl.textContent = 'ON';
+    statusEl.textContent = msg('on');
     statusEl.className = 'toggle-status on';
   } else {
-    statusEl.textContent = 'OFF';
+    statusEl.textContent = msg('off');
     statusEl.className = 'toggle-status off';
   }
 }
@@ -123,27 +136,17 @@ function updateToggleStatus(checkbox, statusEl) {
 driveEnabled.addEventListener('change', () => updateToggleStatus(driveEnabled, driveStatusEl));
 aiEnabled.addEventListener('change', () => updateToggleStatus(aiEnabled, aiStatusEl));
 
-aiProvider.addEventListener('change', () => {
-  anthropicKeyField.style.display = aiProvider.value === 'anthropic' ? 'block' : 'none';
-});
-
 chrome.storage.local.get([
   'driveEnabled', 'driveFolderId',
-  'aiEnabled', 'aiProvider', 'aiApiKey', 'anthropicApiKey',
+  'aiEnabled', 'aiProvider',
   'videoQuality', 'staffList'
 ], (settings) => {
   driveEnabled.checked = settings.driveEnabled || false;
   driveFolderId.value = settings.driveFolderId || '';
   aiEnabled.checked = settings.aiEnabled || false;
   aiProvider.value = settings.aiProvider || 'openai';
-  aiApiKey.value = settings.aiApiKey || '';
-  anthropicApiKey.value = settings.anthropicApiKey || '';
   videoQuality.value = settings.videoQuality || '2500000';
   staffList = settings.staffList || [];
-
-  if (settings.aiProvider === 'anthropic') {
-    anthropicKeyField.style.display = 'block';
-  }
 
   updateToggleStatus(driveEnabled, driveStatusEl);
   updateToggleStatus(aiEnabled, aiStatusEl);
@@ -158,7 +161,7 @@ function renderStaffList() {
     item.innerHTML = `
       <span class="staff-name">${escapeHtml(staff.name)}</span>
       <span class="staff-folder">${escapeHtml(staff.folderId)}</span>
-      <button class="btn-remove" data-index="${index}" title="削除">&times;</button>
+      <button class="btn-remove" data-index="${index}" title="${msg('delete')}">&times;</button>
     `;
     staffListEl.appendChild(item);
   });
@@ -192,12 +195,10 @@ saveBtn.addEventListener('click', () => {
     driveFolderId: driveFolderId.value.trim(),
     aiEnabled: aiEnabled.checked,
     aiProvider: aiProvider.value,
-    aiApiKey: aiApiKey.value.trim(),
-    anthropicApiKey: anthropicApiKey.value.trim(),
     videoQuality: videoQuality.value,
     staffList
   }, () => {
-    saveStatus.textContent = '保存しました';
+    saveStatus.textContent = msg('settingsSaved');
     setTimeout(() => {
       saveStatus.textContent = '';
     }, 2000);

@@ -243,7 +243,7 @@ async function processRecording(filename, size, staffFolderId, outputOptions = {
 
   // Drive アップロード（設定時のみ）
   const settings = await chrome.storage.local.get([
-    'driveFolderId', 'driveEnabled', 'aiEnabled', 'aiProvider', 'aiApiKey', 'anthropicApiKey'
+    'driveFolderId', 'driveEnabled', 'aiEnabled', 'aiProvider', 'licenseKey'
   ]);
 
   const targetFolderId = staffFolderId || settings.driveFolderId;
@@ -262,10 +262,10 @@ async function processRecording(filename, size, staffFolderId, outputOptions = {
       const fileId = await uploadToDrive(blob, filename, targetFolderId);
       notifyPopup({ type: 'upload-complete', filename, fileId });
 
-      if (features.ai && settings.aiApiKey && (outputOptions.transcription || outputOptions.aiAnalysis)) {
+      if (features.ai && settings.licenseKey && (outputOptions.transcription || outputOptions.aiAnalysis)) {
         const label = outputOptions.aiAnalysis ? 'AI分析' : '文字起こし';
         notifyPopup({ type: 'analysis-start', filename });
-        const result = await analyzeRecording(blob, settings.aiProvider, settings.aiApiKey, settings.anthropicApiKey, {
+        const result = await analyzeRecording(blob, settings.aiProvider, settings.licenseKey, {
           transcription: outputOptions.transcription || outputOptions.aiAnalysis,
           aiAnalysis: outputOptions.aiAnalysis,
           modeMinutes: outputOptions.modeMinutes,

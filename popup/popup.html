@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,8 +12,9 @@
       <div class="header-left">
         <h1>Recording Pro</h1>
         <span id="plan-badge" class="plan-badge free">FREE</span>
+        <span id="plan-limit-badge" class="plan-limit-badge" data-i18n="freePlanLimit"></span>
       </div>
-      <button id="settings-btn" class="icon-btn" title="設定">
+      <button id="settings-btn" class="icon-btn" data-i18n-title="settings">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
         </svg>
@@ -30,70 +31,70 @@
     </div>
 
     <div id="mode-section">
-      <label class="mode-label">録画モード</label>
+      <label class="mode-label" data-i18n="recordingMode"></label>
       <div class="mode-buttons">
         <button class="mode-btn active" data-mode="screen">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
           </svg>
-          画面
+          <span data-i18n="modeScreen"></span>
         </button>
         <button class="mode-btn" data-mode="camera">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>
           </svg>
-          カメラ
+          <span data-i18n="modeCamera"></span>
         </button>
         <button class="mode-btn" data-mode="both">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="2" y="3" width="20" height="14" rx="2"/><circle cx="18" cy="18" r="3"/>
           </svg>
-          両方
+          <span data-i18n="modeBoth"></span>
         </button>
       </div>
     </div>
 
     <div id="staff-select-row" class="staff-select-row hidden">
-      <label class="mode-label">担当者</label>
+      <label class="mode-label" data-i18n="staff"></label>
       <select id="staff-select" class="staff-select">
-        <option value="">-- 選択なし（デフォルトフォルダ） --</option>
+        <option value="" data-i18n="staffDefault"></option>
       </select>
     </div>
 
     <div class="option-row">
       <label>
         <input type="checkbox" id="audio-toggle" checked>
-        音声を含める
+        <span data-i18n="includeAudio"></span>
       </label>
     </div>
 
     <div class="output-options">
-      <label class="mode-label">出力オプション</label>
+      <label class="mode-label" data-i18n="outputOptions"></label>
       <div class="option-row">
         <label>
           <input type="checkbox" id="transcription-toggle">
-          文字起こし
-          <span class="pro-lock hidden" id="lock-transcription" title="Proプランで利用可能">&#x1f512;</span>
+          <span data-i18n="transcription"></span>
+          <span class="pro-lock hidden" id="lock-transcription" data-i18n-title="proFeature">&#x1f512;</span>
         </label>
       </div>
       <div class="option-row">
         <label>
           <input type="checkbox" id="ai-analysis-toggle" disabled>
-          AI分析
-          <span class="pro-lock hidden" id="lock-ai" title="Proプランで利用可能">&#x1f512;</span>
+          <span data-i18n="aiAnalysis"></span>
+          <span class="pro-lock hidden" id="lock-ai" data-i18n-title="proFeature">&#x1f512;</span>
         </label>
       </div>
       <div id="analysis-mode-row" class="analysis-mode-options hidden">
         <div class="option-row">
           <label>
             <input type="checkbox" id="mode-minutes" checked>
-            議事録
+            <span data-i18n="modeMinutes"></span>
           </label>
         </div>
         <div class="option-row">
           <label>
             <input type="checkbox" id="mode-feedback">
-            フィードバック
+            <span data-i18n="modeFeedback"></span>
           </label>
         </div>
       </div>
@@ -101,25 +102,30 @@
 
     <button id="record-btn" class="record-btn">
       <span class="record-icon"></span>
-      録画開始
+      <span data-i18n="startRecording"></span>
     </button>
 
     <div id="save-prompt" class="save-prompt hidden">
       <p id="save-info" class="save-info"></p>
       <div class="save-buttons">
-        <button id="save-btn" class="btn-save">保存する</button>
-        <button id="discard-btn" class="btn-discard">破棄する</button>
+        <button id="save-btn" class="btn-save" data-i18n="saveRecording"></button>
+        <button id="discard-btn" class="btn-discard" data-i18n="discardRecording"></button>
       </div>
     </div>
 
     <div id="upgrade-banner" class="upgrade-banner hidden">
-      <span>Proにアップグレードして全機能を解放</span>
-      <a id="upgrade-link" href="#" class="upgrade-btn">アップグレード &rarr;</a>
+      <div class="upgrade-banner-content">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        <span data-i18n="upgradeBanner"></span>
+      </div>
+      <a id="upgrade-link" href="#" class="upgrade-btn" data-i18n="upgradeBtn"></a>
     </div>
 
     <div id="plan-limit-msg" class="plan-limit-msg hidden">
-      <p>Proプランなら60分まで録画可能です</p>
-      <a id="limit-upgrade-link" href="#" class="upgrade-btn-small">Proを見る &rarr;</a>
+      <p data-i18n="planLimitPro"></p>
+      <a id="limit-upgrade-link" href="#" class="upgrade-btn-small" data-i18n="viewPro"></a>
     </div>
 
     <div id="log" class="log"></div>

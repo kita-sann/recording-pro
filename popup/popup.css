@@ -57,6 +57,12 @@ h1 {
   color: #fff;
 }
 
+.plan-limit-badge {
+  font-size: 10px;
+  color: #888;
+  margin-left: 4px;
+}
+
 .pro-lock {
   font-size: 11px;
   margin-left: 4px;
@@ -381,6 +387,17 @@ h1 {
   gap: 8px;
   font-size: 11px;
   color: #fbbf24;
+}
+
+.upgrade-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.upgrade-banner-content svg {
+  color: #f59e0b;
+  flex-shrink: 0;
 }
 
 .upgrade-banner.hidden {

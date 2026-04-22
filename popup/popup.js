@@ -1,3 +1,19 @@
+// i18n: apply localized text to all data-i18n elements
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = chrome.i18n.getMessage(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = chrome.i18n.getMessage(el.getAttribute('data-i18n-title'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = chrome.i18n.getMessage(el.getAttribute('data-i18n-placeholder'));
+  });
+}
+applyI18n();
+
+const msg = (key, ...subs) => chrome.i18n.getMessage(key, subs);
+
 const recordBtn = document.getElementById('record-btn');
 const statusBar = document.getElementById('status-bar');
 const timerEl = document.getElementById('timer');
@@ -24,6 +40,7 @@ const limitUpgradeLink = document.getElementById('limit-upgrade-link');
 const planLimitMsg = document.getElementById('plan-limit-msg');
 const lockTranscription = document.getElementById('lock-transcription');
 const lockAi = document.getElementById('lock-ai');
+const planLimitBadge = document.getElementById('plan-limit-badge');
 
 const CHECKOUT_URL = 'https://recording-pro.lemonsqueezy.com/checkout';
 
@@ -72,6 +89,7 @@ function updatePlanUI(plan) {
   // バッジ更新
   planBadge.textContent = plan.toUpperCase();
   planBadge.className = `plan-badge ${plan}`;
+  planLimitBadge.textContent = isFree ? msg('freePlanLimit') : msg('proPlanLimit');
 
   // Pro機能ロック
   if (isFree) {
@@ -149,16 +167,16 @@ recordBtn.addEventListener('click', () => {
     chrome.runtime.sendMessage({ type: 'stop-capture' });
     stopUI();
   } else {
-    const msg = {
+    const req = {
       type: 'start-capture',
       mode: selectedMode,
       audio: audioToggle.checked
     };
     if (staffSelect.value) {
-      msg.staffFolderId = staffSelect.value;
+      req.staffFolderId = staffSelect.value;
     }
-    chrome.runtime.sendMessage(msg);
-    addLog('録画を準備中...', 'info');
+    chrome.runtime.sendMessage(req);
+    addLog(msg('preparing'), 'info');
   }
 });
 
@@ -170,25 +188,25 @@ chrome.runtime.onMessage.addListener((message) => {
   switch (message.type) {
     case 'recording-started':
       startUI();
-      addLog('録画を開始しました', 'success');
+      addLog(msg('recordingStarted'), 'success');
       break;
     case 'recording-pending':
       showSavePrompt(message.filename, message.size);
       break;
     case 'recording-saved':
-      addLog(`保存: ${message.filename} (${formatSize(message.size)})`, 'success');
+      addLog(msg('saved', message.filename, formatSize(message.size)), 'success');
       break;
     case 'upload-start':
-      addLog(`Driveにアップロード中: ${message.filename}`, 'info');
+      addLog(msg('uploading', message.filename), 'info');
       break;
     case 'upload-complete':
-      addLog(`アップロード完了: ${message.filename}`, 'success');
+      addLog(msg('uploadComplete', message.filename), 'success');
       break;
     case 'analysis-start':
-      addLog('AI分析を実行中...', 'info');
+      addLog(msg('analysisRunning'), 'info');
       break;
     case 'analysis-complete':
-      addLog('AI分析が完了しました', 'success');
+      addLog(msg('analysisComplete'), 'success');
       break;
     case 'audio-level':
       if (audioLevelEl) {
@@ -210,14 +228,14 @@ chrome.runtime.onMessage.addListener((message) => {
       planLimitMsg.classList.remove('hidden');
       break;
     case 'capture-cancelled':
-      addLog('録画がキャンセルされました', 'info');
+      addLog(msg('captureCancelled'), 'info');
       break;
     case 'error':
       if (message.message && message.message.includes('Permission dismissed')) {
         chrome.tabs.create({ url: chrome.runtime.getURL(`permissions/camera.html?audio=${audioToggle.checked}`) });
-        addLog('カメラ許可が必要です。許可ページを開きました。', 'info');
+        addLog(msg('cameraPermission'), 'info');
       } else {
-        addLog(`エラー: ${message.message}`, 'error');
+        addLog(msg('error', message.message), 'error');
       }
       stopUI();
       break;
@@ -227,7 +245,7 @@ chrome.runtime.onMessage.addListener((message) => {
 function startUI(startTime) {
   isRecording = true;
   recordBtn.classList.add('recording');
-  recordBtn.lastChild.textContent = '録画停止';
+  recordBtn.querySelector('[data-i18n]').textContent = msg('stopRecording');
   statusBar.classList.remove('hidden');
   let seconds = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
   const updateTimer = () => {
@@ -245,7 +263,7 @@ function startUI(startTime) {
 function stopUI() {
   isRecording = false;
   recordBtn.classList.remove('recording');
-  recordBtn.lastChild.textContent = '録画開始';
+  recordBtn.querySelector('[data-i18n]').textContent = msg('startRecording');
   statusBar.classList.add('hidden');
   if (timerInterval) {
     clearInterval(timerInterval);
@@ -263,17 +281,17 @@ saveBtn.addEventListener('click', () => {
     modeFeedback: modeFeedback.checked
   });
   savePrompt.classList.add('hidden');
-  addLog('録画を保存しています...', 'info');
+  addLog(msg('saving'), 'info');
 });
 
 discardBtn.addEventListener('click', () => {
   chrome.runtime.sendMessage({ type: 'discard-recording' });
   savePrompt.classList.add('hidden');
-  addLog('録画を破棄しました', 'info');
+  addLog(msg('discarded'), 'info');
 });
 
 function showSavePrompt(filename, size) {
-  saveInfo.textContent = `${filename} (${formatSize(size)}) を保存しますか？`;
+  saveInfo.textContent = msg('saveConfirm', filename, formatSize(size));
   savePrompt.classList.remove('hidden');
 }
 
