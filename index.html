@@ -202,24 +202,31 @@
     }
     .screenshots-track {
       display: flex;
-      gap: 1.5rem;
+      gap: 2rem;
       padding: 0 2rem;
       justify-content: center;
+      align-items: flex-start;
       flex-wrap: wrap;
     }
     .screenshot-item {
-      width: 200px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(99, 102, 241, 0.05);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(99, 102, 241, 0.08);
       transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
       overflow: hidden;
+      background: #1a1a2e;
+      padding: 6px;
     }
     .screenshot-item:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(99, 102, 241, 0.1);
+      transform: translateY(-8px) scale(1.03);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(99, 102, 241, 0.15);
     }
-    .screenshot-item img { width: 100%; display: block; }
+    .screenshot-item img {
+      display: block;
+      height: 420px;
+      width: auto;
+      border-radius: 14px;
+    }
 
     /* Divider */
     .divider {
@@ -569,11 +576,11 @@
 
   <section class="screenshots-section">
     <div class="screenshots-track">
-      <div class="screenshot-item fade-up fade-up-delay-1"><img src="screenshot/resized/01-main.png" alt="メイン画面"></div>
-      <div class="screenshot-item fade-up fade-up-delay-2"><img src="screenshot/resized/02-recording.png" alt="録画中"></div>
-      <div class="screenshot-item fade-up fade-up-delay-3"><img src="screenshot/resized/03-save-confirm.png" alt="保存確認"></div>
-      <div class="screenshot-item fade-up fade-up-delay-4"><img src="screenshot/resized/04-ai-options.png" alt="AI分析オプション"></div>
-      <div class="screenshot-item fade-up fade-up-delay-5"><img src="screenshot/resized/05-settings.png" alt="設定画面"></div>
+      <div class="screenshot-item fade-up fade-up-delay-1"><img src="screenshot/スクリーンショット 2026-04-22 152353.png" alt="メイン画面"></div>
+      <div class="screenshot-item fade-up fade-up-delay-2"><img src="screenshot/スクリーンショット 2026-04-22 152443.png" alt="録画中"></div>
+      <div class="screenshot-item fade-up fade-up-delay-3"><img src="screenshot/スクリーンショット 2026-04-22 152459.png" alt="保存確認"></div>
+      <div class="screenshot-item fade-up fade-up-delay-4"><img src="screenshot/スクリーンショット 2026-04-22 152528.png" alt="AI分析オプション"></div>
+      <div class="screenshot-item fade-up fade-up-delay-5"><img src="screenshot/スクリーンショット 2026-04-22 152559.png" alt="設定画面"></div>
     </div>
   </section>
 
