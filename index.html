@@ -202,30 +202,53 @@
     }
     .screenshots-track {
       display: flex;
-      gap: 2rem;
-      padding: 0 2rem;
-      justify-content: center;
-      align-items: flex-start;
-      flex-wrap: wrap;
+      gap: 1.5rem;
+      padding: 0 calc((100vw - 800px) / 2);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
+    .screenshots-track::-webkit-scrollbar { display: none; }
     .screenshot-item {
+      flex-shrink: 0;
+      width: 800px;
       border-radius: 20px;
       border: 1px solid rgba(255,255,255,0.08);
       box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(99, 102, 241, 0.08);
       transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
       overflow: hidden;
-      background: #1a1a2e;
-      padding: 6px;
+      scroll-snap-align: center;
     }
     .screenshot-item:hover {
-      transform: translateY(-8px) scale(1.03);
+      transform: translateY(-4px);
       box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(99, 102, 241, 0.15);
     }
     .screenshot-item img {
       display: block;
-      height: 420px;
-      width: auto;
-      border-radius: 14px;
+      width: 100%;
+      height: auto;
+      border-radius: 20px;
+    }
+    .screenshots-nav {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+    .screenshots-nav button {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      cursor: pointer;
+      transition: all 0.3s;
+      padding: 0;
+    }
+    .screenshots-nav button.active {
+      background: #6366f1;
+      width: 28px;
+      border-radius: 5px;
     }
 
     /* Divider */
@@ -582,6 +605,13 @@
       <div class="screenshot-item fade-up fade-up-delay-4"><img src="screenshot/canva/4.png" alt="AI分析オプション"></div>
       <div class="screenshot-item fade-up fade-up-delay-5"><img src="screenshot/canva/5.png" alt="設定画面"></div>
     </div>
+    <div class="screenshots-nav">
+      <button class="active" data-index="0"></button>
+      <button data-index="1"></button>
+      <button data-index="2"></button>
+      <button data-index="3"></button>
+      <button data-index="4"></button>
+    </div>
   </section>
 
   <div class="divider"></div>
@@ -785,6 +815,23 @@
       });
     }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Screenshot carousel
+    const track = document.querySelector('.screenshots-track');
+    const dots = document.querySelectorAll('.screenshots-nav button');
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const idx = parseInt(dot.dataset.index);
+        const items = track.querySelectorAll('.screenshot-item');
+        items[idx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      });
+    });
+    track.addEventListener('scroll', () => {
+      const scrollLeft = track.scrollLeft;
+      const itemWidth = track.querySelector('.screenshot-item').offsetWidth + 24;
+      const idx = Math.round(scrollLeft / itemWidth);
+      dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    });
   </script>
 
 </body>
